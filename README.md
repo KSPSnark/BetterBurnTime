@@ -1,5 +1,5 @@
 # BetterBurnTime
-KSP mod for a more accurate/reliable "estimated burn time" indicator on the navball.
+KSP mod for a more accurate/reliable "estimated burn time" indicator on the navball.  Also provides estimated time-of-impact for landing on vacuum worlds.
 
 
 ##How to install
@@ -7,14 +7,21 @@ Unzip into your GameData folder, like any mod.
 
 
 ## What this mod does
-It tweaks the "estimated burn time" display on the navball so that it will be reliable and accurate. It takes into account increasing acceleration as fuel mass is burned.
+* It tweaks the "estimated burn time" display on the navball so that it will be reliable and accurate. It takes into account increasing acceleration as fuel mass is burned.
+* When the ship is in vacuum and on a collision course with the ground, it will automatically show time-to-impact, and the estimated burn time to kill your velocity at ground level.
 
 ####What this means:
+
+**For maneuver nodes:**
 
 * You will see a burn time that will be accurate to the second.
 * You will never see "N/A" unless your vessel actually can't run at all (e.g. is out of fuel or has no active engines).
 * Shows a warning if the maneuver would require more fuel than you have (see below).
 
+**For landing on planets/moons without atmosphere:**
+
+* If you don't have any maneuver nodes set, and you're on a collision course with the ground, you'll see an estimated time-of-impact (instead of time-until-maneuver), and an estimated burn time to kill your velocity.
+* This is useful when deciding when to do your retro-burn for landing.
 
 ## Why it's needed
 The "estimated burn time" indicator provided by stock KSP is very rudimentary. It just keeps track of the maximum acceleration observed for the current ship in the current flight session, and then assumes that. This has several drawbacks:
@@ -50,6 +57,19 @@ If the mod decides that you don't have enough dV to do the specified maneuver, i
 Note that it won't do this if you have the "infinite fuel" cheat turned on (since then you always have enough dV!)
 
 
+## The time-to-impact indicator
+Under the right circumstances, the mod will display a "time until impact" indicator (instead of "time until maneuver"), along with an estimated burn time which is how long your engine would need to kill your velocity at ground level.
+
+All of the following conditions must be met for this indicator to be displayed:
+
+* The impact tracker isn't disabled via settings (see "Settings", below)
+* The planet/moon whose SoI you're in has no atmosphere.  (Someday I may release an update to enable the impact indicator when it's in atmosphere, but not right now.  It gets ugly and would significantly complicate the calculations.)
+* You're on a trajectory that intersects the surface.
+* You're falling by at least 2 m/s.
+* The time of impact is no more than 120 seconds away (though you can tweak this with settings, see below).
+
+Note that the time-to-impact is based on the assumption that you don't do a retro-burn and just coast to your doom.  So if you're figuring out "when do I start my retro-burn to land," you'll generally want to wait a little bit after the point at which time-to-impact equals estimated burn time.
+
 ## Caveats
 There's a reason this mod is called *BetterBurnTime* and not *PerfectBurnTime*.  There are some conditions that it does *not* handle, as follows:
 
@@ -70,6 +90,14 @@ The mod doesn't know what your fuel is going to do.  It naively assumes that all
 #### Ignores zero-density resources (e.g. electricity)
 The mod assumes that any resources you have that don't have mass (e.g. electricity) are replenishable and therefore don't need to be tracked. Therefore, if you have an ion-powered craft and you're going to run out of electricity, the mod won't predict that. It will assume that you're going to have full electricity for the duration of the burn.
 
+#### Time to impact is very simplistic
+The calculations for determining when your ship will hit the surface are very simple.  It looks at the elevation directly under the ship, and at your current vertical speed.  It corrects for the acceleration of gravity, but nothing else.  This means that if you're flying over rough terrain, the time-to-impact indicator will be irregular (it will suddenly get shorter when you're flying over an ascending slope, or longer when you're flying over a descending slope).  If you're hurtling horizontally and about to smack into the side of a mountain range looming up in front of you, the mod has no clue.  Be warned.
+
+The mod does make a very rudimentary attempt to keep track of where the *bottom* of your ship is, so that impact time will be actual impact time and not when your probe core up top would hit.  It's only a very rough approximation, though, so don't count on pinpoint accuracy at low speeds.
+
+**Important:** The time-to-impact estimate takes into account your current velocity and the acceleration of gravity, and that's it.  It deliberately does *not* take into account the acceleration of your engines, if you're
+firing them.  It's an estimate of "how long would I take to smash into the ground if I turned off all my engines."  So when you're retro-burning to land, the actual time to reach the ground will be **longer** than the displayed estimate, depending on things such as your TWR, throttle setting, angle of approach, etc.  So if you want to time your burn so that you reach zero velocity right when you get to ground level, you'll need to wait a little bit past the point where the estimated time to impact equals the estimated burn time.
+
 
 ## Simple vs. complex acceleration
 By default, this mod uses a "complex" calculation of burn time that takes into account that your acceleration will increase as you burn fuel mass.  This is what allows the mod to produce accurate burn times.
@@ -87,7 +115,9 @@ After the first time you run KSP with the mod installed, there will be a configu
 
 GameData/BetterBurnTime/PluginData/BetterBurnTime/config.xml
 
-Currently, there is only one setting, UseSimpleAcceleration.  By default, this is set to 0, meaning that the mod will use complex acceleration in its calculations.
+The following settings are supported:
 
-If you set it to 1, then you will force the mod to use simple acceleration for all its calculations all the time.
+* **UseSimpleAcceleration:** By default, this is set to 0, meaning that the mod will use complex acceleration in its calculations.  If you set it to 1, then you will force the mod to use simple acceleration for all its calculations all the time.
+* **ShowImpactTracker:** By default, this is set to 1.  If you set it to 0, then you will disable the "time to impact" display.
+* **MaxTimeToImpact:** This is the maximum time, in seconds, that the impact tracker will predict a collision with terrain.  By default, it's 120 (two minutes). You can raise or lower this.  (Has no effect if ShowImpactTracker is set to 0, since then all impact tracking is turned off.)
 

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BetterBurnTime
 {
@@ -45,8 +42,7 @@ namespace BetterBurnTime
             vesselPartCount = vessel.parts.Count;
             totalMass = vessel.GetTotalMass();
             activeEngines.Clear();
-            availableResources = new Tally();
-            foreach (Part part in vessel.Parts)
+            foreach (Part part in Propulsion.Engines)
             {
                 foreach (ModuleEngines engine in part.Modules.GetModules<ModuleEngines>())
                 {
@@ -66,6 +62,11 @@ namespace BetterBurnTime
                     }
                     activeEngines.Add(engine);
                 }
+            }
+
+            availableResources = new Tally();
+            foreach (Part part in Propulsion.Tanks)
+            {
                 foreach (PartResource resource in part.Resources)
                 {
                     if (resource.flowState)

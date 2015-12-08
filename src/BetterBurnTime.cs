@@ -36,22 +36,24 @@ namespace BetterBurnTime
             PluginConfiguration config = PluginConfiguration.CreateForType<BetterBurnTime>();
             config.load();
             useSimpleAcceleration = config.GetValue<bool>("UseSimpleAcceleration", false);
+            ImpactTracker.displayEnabled = config.GetValue<bool>("ShowImpactTracker", true);
+            ImpactTracker.maxTimeToImpact = config.GetValue<double>("MaxTimeToImpact", 120);
             config.save();
             wasFuelCheat = CheatOptions.InfiniteFuel;
             if (useSimpleAcceleration)
             {
-                Log("Using simple acceleration model");
+                Logging.Log("Using simple acceleration model");
             }
             else
             {
-                Log("Using complex acceleration model");
+                Logging.Log("Using complex acceleration model");
                 if (wasFuelCheat)
                 {
-                    Log("Infinite fuel cheat is turned on, using simple acceleration model");
+                    Logging.Log("Infinite fuel cheat is turned on, using simple acceleration model");
                 }
                 else
                 {
-                    Log("Using complex acceleration model");
+                    Logging.Log("Using complex acceleration model");
                 }
             }
             lastEngineCount = -1;
@@ -67,28 +69,38 @@ namespace BetterBurnTime
             logFuelCheatActivation();
             try
             {
-                if (burnVector.ebtText.enabled)
-                {
-                    vessel.Refresh();
-                    propellantsConsumed = new Tally();
-                    bool isInsufficientFuel;
-                    double floatBurnSeconds = GetBurnTime(burnVector.dVremaining, out isInsufficientFuel);
-                    int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
-                    if (burnSeconds != lastBurnTime)
-                    {
-                        lastBurnTime = burnSeconds;
-                        String burnLabel = FormatBurnTime(burnSeconds);
-                        lastUpdateText = ESTIMATED_BURN_LABEL + FormatBurnTime(burnSeconds);
-                        if (isInsufficientFuel)
-                        {
-                            lastUpdateText = ESTIMATED_BURN_LABEL + "(~" + burnLabel + ")";
-                        } else
-                        {
-                            lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
-                        }
-                    }
-                    burnVector.ebtText.text = lastUpdateText;
+                ScreenSafeGUIText burnText;
+                double dVrequired;
+                if (burnVector.ebtText.enabled) {
+                    burnText = burnVector.ebtText;
+                    dVrequired = burnVector.dVremaining;
                 }
+                else
+                {
+                    burnText = ImpactTracker.BurnTimeText;
+                    dVrequired = ImpactTracker.ImpactSpeed;
+                }
+                if ((burnText == null) || !burnText.enabled || double.IsNaN(dVrequired)) return;
+
+                vessel.Refresh();
+                propellantsConsumed = new Tally();
+                bool isInsufficientFuel;
+                double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
+                int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
+                if (burnSeconds != lastBurnTime)
+                {
+                    lastBurnTime = burnSeconds;
+                    string burnLabel = FormatBurnTime(burnSeconds);
+                    lastUpdateText = ESTIMATED_BURN_LABEL + FormatBurnTime(burnSeconds);
+                    if (isInsufficientFuel)
+                    {
+                        lastUpdateText = ESTIMATED_BURN_LABEL + "(~" + burnLabel + ")";
+                    } else
+                    {
+                        lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
+                    }
+                }
+               burnText.text = lastUpdateText;
             } catch (Exception e)
             {
                 burnVector.ebtText.text = e.GetType().Name + ": " + e.Message + " -> " + e.StackTrace;
@@ -107,11 +119,11 @@ namespace BetterBurnTime
                 {
                     if (wasFuelCheat)
                     {
-                        Log("Infinite fuel cheat activated. Will use simple acceleration model.");
+                        Logging.Log("Infinite fuel cheat activated. Will use simple acceleration model.");
                     }
                     else
                     {
-                        Log("Infinite fuel cheat deactivated. Will use complex acceleration model.");
+                        Logging.Log("Infinite fuel cheat deactivated. Will use complex acceleration model.");
                     }
                 }
             }
@@ -127,6 +139,10 @@ namespace BetterBurnTime
             if (totalSeconds < 0)
             {
                 return "N/A";
+            }
+            if (totalSeconds == 0)
+            {
+                return "<1s";
             }
             if (totalSeconds <= THRESHOLD_SECONDS)
             {
@@ -168,7 +184,11 @@ namespace BetterBurnTime
             // How thirsty are we?
             double totalThrust; // kilonewtons
             GetThrustInfo(propellantsConsumed, out totalThrust);
-            if (totalThrust < ACCELERATION_EPSILON) return double.PositiveInfinity;
+            if (totalThrust < ACCELERATION_EPSILON)
+            {
+                // Can't thrust, will take forever.
+                return double.PositiveInfinity;
+            }
 
             // If infinite fuel is turned on, or if the "use simple acceleration" config
             // option is set, just do a simple dV calculation.
@@ -270,7 +290,7 @@ namespace BetterBurnTime
             if (engineCount != lastEngineCount)
             {
                 lastEngineCount = engineCount;
-                Log(engineCount.ToString("Active engines: #"));
+                Logging.Log(engineCount.ToString("Active engines: ##0"));
             }
         }
 
@@ -303,11 +323,6 @@ namespace BetterBurnTime
                 if (burnTime < maxBurnTime) maxBurnTime = burnTime;
             }
             return maxBurnTime;
-        }
-
-        private static void Log(object message)
-        {
-            Debug.Log("[BetterBurnTime] " + message);
         }
 
         private static bool ShouldIgnore(String propellantName)
