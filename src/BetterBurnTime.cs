@@ -279,11 +279,7 @@ namespace BetterBurnTime
                         }
                     } // if we need to worry about fuel
                     ++engineCount;
-                    foreach (Transform transform in engine.thrustTransforms)
-                    {
-                        Vector3 increment = transform.forward * (float)engineKilonewtons;
-                        totalThrustVector += increment;
-                    }
+                    totalThrustVector += Propulsion.ForwardOf(engine) * (float)engineKilonewtons;
                 } // if the engine is operational
             } // for each engine module on the part
             totalThrust = totalThrustVector.magnitude;

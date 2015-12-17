@@ -80,28 +80,19 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets the current thrust in kilonewtons.
+        /// Gets a unit vector pointing in the engine's "forward" direction (opposite its thrust direction).
         /// </summary>
-        public static Vector3 GetCurrentThrust()
+        /// <param name="engine"></param>
+        /// <returns></returns>
+        public static Vector3 ForwardOf(ModuleEngines engine)
         {
-            Vector3 thrust = new Vector3d(0, 0, 0);
-            foreach (Part engine in Engines)
+            Vector3 sum = Vector3.zero;
+            if (engine.thrustTransforms.Count == 0) return sum;
+            foreach (Transform transform in engine.thrustTransforms)
             {
-                List<ModuleEngines> modules = engine.Modules.GetModules<ModuleEngines>();
-                foreach (ModuleEngines module in modules)
-                {
-                    double currentThrust = module.GetCurrentThrust();
-                    if (currentThrust > 0)
-                    {
-                        foreach (Transform transform in module.thrustTransforms)
-                        {
-                            Vector3 increment = transform.forward * (float)currentThrust;
-                            thrust -= increment; // because thrust is opposite the engine's forward direction
-                        }
-                    }
-                }
+                sum += transform.forward;
             }
-            return thrust;
+            return sum.normalized;
         }
 
         /// <summary>
