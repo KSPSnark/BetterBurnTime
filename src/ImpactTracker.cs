@@ -182,10 +182,13 @@ namespace BetterBurnTime
         {
             get
             {
-                if (!displayEnabled) return false;
-                if (burnVector.ebtText.enabled) return false;
-                if (burnVector.TdnText.enabled) return false;
-
+				if (!displayEnabled) return false;
+				// NullPointer check
+				if (burnVector != null) {
+					if (burnVector.ebtText.enabled) return false;
+					if (burnVector.TdnText.enabled) return false;
+				}
+                
                 // Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
                 // when someone pops a parachute gets stupidly noisy and makes for a bad experience.
                 // Just turn it off until I figure out a better solution. This can wait for
