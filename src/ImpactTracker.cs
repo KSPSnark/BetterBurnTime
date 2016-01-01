@@ -182,17 +182,34 @@ namespace BetterBurnTime
         {
             get
             {
-                if (!displayEnabled) return false;
-                if (burnVector.ebtText.enabled) return false;
-                if (burnVector.TdnText.enabled) return false;
+				bool shouldDisplay = false;
+				try {
+					// NullPointer checks
+					if (!displayEnabled) shouldDisplay = false;
+					if (burnVector == null)
+						shouldDisplay = false;
+					else if (burnVector.ebtText != null
+						&& burnVector.TdnText != null) {
+						if (burnVector.ebtText.enabled) 
+							shouldDisplay = false;
+						if (burnVector.TdnText.enabled) 
+							shouldDisplay = false;
+					}
 
-                // Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
-                // when someone pops a parachute gets stupidly noisy and makes for a bad experience.
-                // Just turn it off until I figure out a better solution. This can wait for
-                // a future update.
-                if (FlightGlobals.currentMainBody.atmosphere) return false;
+					// Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
+					// when someone pops a parachute gets stupidly noisy and makes for a bad experience.
+					// Just turn it off until I figure out a better solution. This can wait for
+					// a future update.
+					if (FlightGlobals.ready
+						&& FlightGlobals.currentMainBody != null 
+						&& FlightGlobals.currentMainBody.atmosphere) shouldDisplay = false;
 
-                return true;
+					shouldDisplay = true;
+				}catch(Exception e) {
+					Logging.Exception(e);
+				}
+
+				return shouldDisplay;
             }
         }
 

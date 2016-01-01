@@ -69,38 +69,45 @@ namespace BetterBurnTime
             logFuelCheatActivation();
             try
             {
-                ScreenSafeGUIText burnText;
-                double dVrequired;
-                if (burnVector.ebtText.enabled) {
-                    burnText = burnVector.ebtText;
-                    dVrequired = burnVector.dVremaining;
-                }
-                else
-                {
-                    burnText = ImpactTracker.BurnTimeText;
-                    dVrequired = ImpactTracker.ImpactSpeed;
-                }
-                if ((burnText == null) || !burnText.enabled || double.IsNaN(dVrequired)) return;
+				// safely initializing variables
+				ScreenSafeGUIText burnText = new ScreenSafeGUIText();
+				double dVrequired = double.NaN;
 
-                vessel.Refresh();
-                propellantsConsumed = new Tally();
-                bool isInsufficientFuel;
-                double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
-                int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
-                if (burnSeconds != lastBurnTime)
-                {
-                    lastBurnTime = burnSeconds;
-                    string burnLabel = FormatBurnTime(burnSeconds);
-                    lastUpdateText = ESTIMATED_BURN_LABEL + FormatBurnTime(burnSeconds);
-                    if (isInsufficientFuel)
-                    {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + "(~" + burnLabel + ")";
-                    } else
-                    {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
-                    }
-                }
-               burnText.text = lastUpdateText;
+				// NullPointer check
+				if(burnVector != null) {
+					if (burnVector.ebtText.enabled) {
+						burnText = burnVector.ebtText;
+						dVrequired = burnVector.dVremaining;
+					}
+				}
+
+				// NullPointer sanity check from above
+				if(double.IsNaN(dVrequired)) {
+					burnText = ImpactTracker.BurnTimeText;
+					dVrequired = ImpactTracker.ImpactSpeed;
+				}
+
+				if (double.IsNaN(dVrequired)) return;
+
+				vessel.Refresh();
+				propellantsConsumed = new Tally();
+				bool isInsufficientFuel;
+				double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
+				int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
+				if (burnSeconds != lastBurnTime)
+				{
+					lastBurnTime = burnSeconds;
+					string burnLabel = FormatBurnTime(burnSeconds);
+					lastUpdateText = ESTIMATED_BURN_LABEL + FormatBurnTime(burnSeconds);
+					if (isInsufficientFuel)
+					{
+						lastUpdateText = ESTIMATED_BURN_LABEL + "(~" + burnLabel + ")";
+					} else
+					{
+						lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
+					}
+				}
+				burnText.text = lastUpdateText;
             } catch (Exception e)
             {
                 burnVector.ebtText.text = e.GetType().Name + ": " + e.Message + " -> " + e.StackTrace;
