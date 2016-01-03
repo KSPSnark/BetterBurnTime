@@ -18,9 +18,6 @@ namespace BetterBurnTime
         private static ImpactTracker instance = null;
         private DateTime lastVesselHeightUpdate;
         private double lastVesselHeight;
-        private NavBallBurnVector burnVector = null;
-        private ScreenSafeGUIText burnTimeText = null;
-        private ScreenSafeGUIText impactTimeText = null;
         private int secondsUntilImpact = -1;
         private string impactVerb;
         private double impactSpeed;
@@ -45,9 +42,6 @@ namespace BetterBurnTime
                 instance = this;
                 lastVesselHeight = double.NaN;
                 lastVesselHeightUpdate = DateTime.Now;
-                burnVector = GameObject.FindObjectOfType<NavBallBurnVector>();
-                burnTimeText = CloneBehaviour(burnVector.ebtText);
-                impactTimeText = CloneBehaviour(burnVector.TdnText);
                 impactVerb = "N/A";
                 impactSpeed = double.NaN;
                 secondsUntilImpact = -1;
@@ -75,27 +69,12 @@ namespace BetterBurnTime
                 if (shouldDisplay)
                 {
                     UpdateContent(calculatedTimeToImpact);
-                    burnTimeText.enabled = impactTimeText.enabled = true;
                 }
-                else
-                {
-                    burnTimeText.enabled = impactTimeText.enabled = false;
-                }
+                BurnInfo.AlternateDisplayEnabled = shouldDisplay;
             }
             catch (Exception e)
             {
                 Logging.Exception(e);
-            }
-        }
-
-        /// <summary>
-        /// Gets the text object for displaying burn time (null if none).
-        /// </summary>
-        public static ScreenSafeGUIText BurnTimeText
-        {
-            get
-            {
-                return (instance == null) ? null : (IsDisplayed ? instance.burnTimeText : null);
             }
         }
 
@@ -117,7 +96,7 @@ namespace BetterBurnTime
         {
             get
             {
-                return (instance == null) ? false : (instance.burnTimeText.enabled && instance.impactTimeText.enabled);
+                return (instance == null) ? false : BurnInfo.AlternateDisplayEnabled;
             }
         }
 
@@ -141,7 +120,7 @@ namespace BetterBurnTime
             if (remainingSeconds != secondsUntilImpact)
             {
                 secondsUntilImpact = remainingSeconds;
-                impactTimeText.text = string.Format("{0} in {1} s", impactVerb, secondsUntilImpact);
+                BurnInfo.TimeUntil = string.Format("{0} in {1} s", impactVerb, secondsUntilImpact);
             }
         }
 
@@ -157,25 +136,6 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Clones a behaviour.
-        /// </summary>
-        /// <param name="source"></param>
-        /// <param name="initialText"></param>
-        /// <returns></returns>
-        private static T CloneBehaviour<T>(T source) where T : Behaviour
-        {
-            GameObject clonedObject = UnityEngine.Object.Instantiate(
-                source.gameObject,
-                source.transform.position,
-                source.transform.rotation) as GameObject;
-            clonedObject.transform.parent = source.gameObject.transform.parent;
-            T clonedBehaviour = clonedObject.GetComponent<T>();
-
-            clonedBehaviour.enabled = false;
-            return clonedBehaviour;
-        }
-
-        /// <summary>
         /// Determines whether the impact tracker should display.
         /// </summary>
         private bool ShouldDisplay
@@ -183,14 +143,13 @@ namespace BetterBurnTime
             get
             {
                 if (!displayEnabled) return false;
-                if (burnVector.ebtText.enabled) return false;
-                if (burnVector.TdnText.enabled) return false;
+                if (BurnInfo.OriginalDisplayEnabled) return false;
 
                 // Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
                 // when someone pops a parachute gets stupidly noisy and makes for a bad experience.
                 // Just turn it off until I figure out a better solution. This can wait for
                 // a future update.
-                if (FlightGlobals.currentMainBody.atmosphere) return false;
+                if ((FlightGlobals.currentMainBody != null) && (FlightGlobals.currentMainBody.atmosphere)) return false;
 
                 return true;
             }
@@ -207,7 +166,7 @@ namespace BetterBurnTime
         private static string ToString(Vector3d vector)
         {
             if (vector == null) return "null";
-            return String.Format(
+            return string.Format(
                 "<{0:####0.000},{1:####0.000},{2:####0.000}> ({3:####0.000})", 
                 vector.x,
                 vector.y,

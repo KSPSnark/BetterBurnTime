@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using KSP.IO;
 
@@ -20,14 +19,13 @@ namespace BetterBurnTime
         // Kerbin gravity, needed for working with Isp
         private static readonly double KERBIN_GRAVITY = 9.81;
 
-        private static readonly String ESTIMATED_BURN_LABEL = "Est. Burn: ";
+        private static readonly string ESTIMATED_BURN_LABEL = "Est. Burn: ";
 
         private bool useSimpleAcceleration = false;
         private bool wasFuelCheat = false;
         private int lastEngineCount;
         private ShipState vessel;
-        private NavBallBurnVector burnVector;
-        private String lastUpdateText;
+        private string lastUpdateText;
         private int lastBurnTime;
         private Tally propellantsConsumed;
 
@@ -59,7 +57,6 @@ namespace BetterBurnTime
             lastEngineCount = -1;
 
             vessel = new ShipState();
-            burnVector = GameObject.FindObjectOfType<NavBallBurnVector>();
             lastUpdateText = null;
             lastBurnTime = int.MinValue;
         }
@@ -69,18 +66,9 @@ namespace BetterBurnTime
             logFuelCheatActivation();
             try
             {
-                ScreenSafeGUIText burnText;
-                double dVrequired;
-                if (burnVector.ebtText.enabled) {
-                    burnText = burnVector.ebtText;
-                    dVrequired = burnVector.dVremaining;
-                }
-                else
-                {
-                    burnText = ImpactTracker.BurnTimeText;
-                    dVrequired = ImpactTracker.ImpactSpeed;
-                }
-                if ((burnText == null) || !burnText.enabled || double.IsNaN(dVrequired)) return;
+                if (!BurnInfo.IsInitialized) return; // can't do anything
+                double dVrequired = ImpactTracker.IsDisplayed ? ImpactTracker.ImpactSpeed : BurnInfo.DvRemaining;
+                if (double.IsNaN(dVrequired)) return;
 
                 vessel.Refresh();
                 propellantsConsumed = new Tally();
@@ -100,10 +88,12 @@ namespace BetterBurnTime
                         lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
                     }
                 }
-               burnText.text = lastUpdateText;
-            } catch (Exception e)
+                BurnInfo.Duration = lastUpdateText;
+            }
+            catch (Exception e)
             {
-                burnVector.ebtText.text = e.GetType().Name + ": " + e.Message + " -> " + e.StackTrace;
+                Logging.Exception(e);
+                BurnInfo.Duration = e.GetType().Name + ": " + e.Message + " -> " + e.StackTrace;
             }
         }
 
@@ -134,7 +124,7 @@ namespace BetterBurnTime
         /// </summary>
         /// <param name="totalSeconds"></param>
         /// <returns></returns>
-        private static String FormatBurnTime(int totalSeconds)
+        private static string FormatBurnTime(int totalSeconds)
         {
             if (totalSeconds < 0)
             {
@@ -152,20 +142,20 @@ namespace BetterBurnTime
             {
                 int minutes = totalSeconds / 60;
                 int seconds = totalSeconds % 60;
-                return String.Format("{0}m{1}s", minutes, seconds);
+                return string.Format("{0}m{1}s", minutes, seconds);
             }
             else if (totalSeconds <= THRESHOLD_HOURS_MINUTES_SECONDS)
             {
                 int hours = totalSeconds / 3600;
                 int minutes = (totalSeconds % 3600) / 60;
                 int seconds = totalSeconds % 60;
-                return String.Format("{0}h{1}m{2}s", hours, minutes, seconds);
+                return string.Format("{0}h{1}m{2}s", hours, minutes, seconds);
             }
             else if (totalSeconds <= THRESHOLD_HOURS_MINUTES)
             {
                 int hours = totalSeconds / 3600;
                 int minutes = (totalSeconds % 3600) / 60;
-                return String.Format("{0}h{1}m", hours, minutes);
+                return string.Format("{0}h{1}m", hours, minutes);
             }
             else
             {
@@ -301,7 +291,7 @@ namespace BetterBurnTime
         {
             double maxBurnTime = double.PositiveInfinity;
             Tally availableResources = vessel.AvailableResources;
-            foreach (String resourceName in propellantsConsumed.Keys)
+            foreach (string resourceName in propellantsConsumed.Keys)
             {
                 if (ShouldIgnore(resourceName))
                 {
@@ -321,7 +311,7 @@ namespace BetterBurnTime
             return maxBurnTime;
         }
 
-        private static bool ShouldIgnore(String propellantName)
+        private static bool ShouldIgnore(string propellantName)
         {
             return "ElectricCharge".Equals(propellantName);
         }
