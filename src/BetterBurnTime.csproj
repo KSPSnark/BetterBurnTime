@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="BetterBurnTime.cs" />
     <Compile Include="BurnInfo.cs" />
+    <Compile Include="ClosestApproachTracker.cs" />
     <Compile Include="ImpactTracker.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="ShipState.cs" />

@@ -1,5 +1,5 @@
 # BetterBurnTime
-KSP mod for a more accurate/reliable "estimated burn time" indicator on the navball.  Also provides estimated time-of-impact for landing on vacuum worlds.
+KSP mod for a more accurate/reliable "estimated burn time" indicator on the navball.  Also provides estimated time-of-impact for landing on vacuum worlds, and time-to-closest-approach for orbital rendezvous.
 
 
 ##How to install
@@ -9,6 +9,7 @@ Unzip into your GameData folder, like any mod.
 ## What this mod does
 * It tweaks the "estimated burn time" display on the navball so that it will be reliable and accurate. It takes into account increasing acceleration as fuel mass is burned.
 * When the ship is in vacuum and on a collision course with the ground, it will automatically show time-to-impact, and the estimated burn time to kill your velocity at ground level.
+* When the ship is in orbit and has a close rendezvous with a target ship, it will automatically show time-to-closest-approach, and the estimated burn time to kill your velocity relative to the target.
 
 ####What this means:
 
@@ -20,8 +21,11 @@ Unzip into your GameData folder, like any mod.
 
 **For landing on planets/moons without atmosphere:**
 
-* If you don't have any maneuver nodes set, and you're on a collision course with the ground, you'll see an estimated time-of-impact (instead of time-until-maneuver), and an estimated burn time to kill your velocity.
+* If you don't have any maneuver nodes set, and you're on a collision course with the ground, you'll see an estimated time-until-impact (instead of time-until-maneuver), and an estimated burn time to kill your velocity.
 * This is useful when deciding when to do your retro-burn for landing.
+
+**For orbital rendezvous**
+* If you can set up a rendezvous that will take you within 10 km of the target, you'll see an estimated time-until-closest-approach (instead of time-until-maneuver), and an estimated burn time to match velocity with the target.
 
 ## Why it's needed
 The "estimated burn time" indicator provided by stock KSP is very rudimentary. It just keeps track of the maximum acceleration observed for the current ship in the current flight session, and then assumes that. This has several drawbacks:
@@ -63,12 +67,26 @@ Under the right circumstances, the mod will display a "time until impact" indica
 All of the following conditions must be met for this indicator to be displayed:
 
 * The impact tracker isn't disabled via settings (see "Settings", below)
+* You don't have a maneuver node set.
 * The planet/moon whose SoI you're in has no atmosphere.  (Someday I may release an update to enable the impact indicator when it's in atmosphere, but not right now.  It gets ugly and would significantly complicate the calculations.)
 * You're on a trajectory that intersects the surface.
 * You're falling by at least 2 m/s.
 * The time of impact is no more than 120 seconds away (though you can tweak this with settings, see below).
 
 Note that the time-to-impact is based on the assumption that you don't do a retro-burn and just coast to your doom.  So if you're figuring out "when do I start my retro-burn to land," you'll generally want to wait a little bit after the point at which time-to-impact equals estimated burn time.
+
+## The time-to-closest-approach indicator
+Under the right circumstances, the mod will display a "time until closest approach" indicator (instead of "time until maneuver"), along with an estimated burn time to match velocity with the target.
+
+All of the following conditions must be met for this indicator to be displayed:
+* The approach tracker isn't disabled via settings (see "Settings", below)
+* You don't have a maneuver node set
+* The impact tracker (see above) isn't displaying time-to-impact
+* You have a target, which is a vessel (e.g. not a planet)
+* Neither you nor your target is landed
+* You have an upcoming approach within 10 km distance
+* The closest approach is no more than 15 minutes from now
+* You're not within 200 meters of the target and going under 10 m/s, or within 400 meters and going under 1 m/s
 
 ## Caveats
 There's a reason this mod is called *BetterBurnTime* and not *PerfectBurnTime*.  There are some conditions that it does *not* handle, as follows:
@@ -120,4 +138,9 @@ The following settings are supported:
 * **UseSimpleAcceleration:** By default, this is set to 0, meaning that the mod will use complex acceleration in its calculations.  If you set it to 1, then you will force the mod to use simple acceleration for all its calculations all the time.
 * **ShowImpactTracker:** By default, this is set to 1.  If you set it to 0, then you will disable the "time to impact" display.
 * **MaxTimeToImpact:** This is the maximum time, in seconds, that the impact tracker will predict a collision with terrain.  By default, it's 120 (two minutes). You can raise or lower this.  (Has no effect if ShowImpactTracker is set to 0, since then all impact tracking is turned off.)
+* **ShowClosestApproachTracker:** By default, this is set to 1. If you set it to 0, then you will disable the "time until closest approach" display.
+* **MaxTimeUntilEncounter:** This is the maximum time, in seconds, that the closest-approach tracker will predict a closest approach. By default, it's 900 (fifteen minutes).
+* **MaxClosestApproachDistanceKm:** This is the maximum distance, in kilometers, that a closest approach can be for the closest-approach tracker to show a prediction. By default, it's 10 km.
+* **MinTargetDistanceMeters:** The target must be at least this many meters away from your ship for the closest-approach tracker to show a prediction. By default, it's 200 meters.
+
 

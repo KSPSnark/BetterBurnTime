@@ -16,11 +16,17 @@ namespace BetterBurnTime
         private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 250);
 
         private static ImpactTracker instance = null;
+
+        // The last time we updated our calculations. Used with UPDATE_INTERVAL
+        // to prevent spamming excessive calculations.
         private DateTime lastVesselHeightUpdate;
+
+        // Results of calculations
         private double lastVesselHeight;
         private int secondsUntilImpact = -1;
         private string impactVerb;
         private double impactSpeed;
+        private string impactDescription;
 
         /// <summary>
         /// Global setting for whether impact tracking is enabled.
@@ -40,11 +46,8 @@ namespace BetterBurnTime
             try
             {
                 instance = this;
-                lastVesselHeight = double.NaN;
                 lastVesselHeightUpdate = DateTime.Now;
-                impactVerb = "N/A";
-                impactSpeed = double.NaN;
-                secondsUntilImpact = -1;
+                Reset();
             }
             catch (Exception e)
             {
@@ -59,18 +62,14 @@ namespace BetterBurnTime
         {
             try
             {
-                bool shouldDisplay = ShouldDisplay;
-                double calculatedTimeToImpact = double.PositiveInfinity;
-                if (shouldDisplay)
+                if (BurnInfo.OriginalDisplayEnabled)
                 {
-                    calculatedTimeToImpact = CalculateTimeToImpact(FlightGlobals.ActiveVessel, out impactVerb, out impactSpeed);
-                    if (calculatedTimeToImpact > maxTimeToImpact) shouldDisplay = false;
+                    if (HasInfo) Reset();
                 }
-                if (shouldDisplay)
+                else
                 {
-                    UpdateContent(calculatedTimeToImpact);
+                    Recalculate();
                 }
-                BurnInfo.AlternateDisplayEnabled = shouldDisplay;
             }
             catch (Exception e)
             {
@@ -90,38 +89,57 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets whether the impact tracker is currently displayed.
+        /// Gets the description to show for closest approach (including time-until).
+        /// Null if not available.
         /// </summary>
-        public static bool IsDisplayed
+        public static string Description
         {
-            get
-            {
-                return (instance == null) ? false : BurnInfo.AlternateDisplayEnabled;
-            }
+            get { return (instance == null) ? null : instance.impactDescription; }
         }
 
         /// <summary>
-        /// Here when we need to update the content of the text display. Called on every frame.
+        /// Do necessary calculations around impact tracking. Returns true if there's anything to display.
         /// </summary>
-        private void UpdateContent(double calculatedTimeToImpact)
+        /// <returns></returns>
+        private bool Recalculate()
         {
-            Vessel vessel = FlightGlobals.ActiveVessel;
+            bool shouldDisplay = displayEnabled;
 
-            // A possible interesting future enhancement: use vessel.terrainNormal to deal better
-            // with landing on sloping terrain. Right now we're making the simplifying assumption
-            // that ground is flat, and the distance to fall is simply the ship's current height
-            // above the ground. The vector vessel.terrainNormal gives the vessel's orientation
-            // relative to the ground (i.e. <0,1,0> means "pointing straight away from the ground").
-            // We could use that to compensate for sloping ground, so that if we're traveling
-            // sideways and the ground is rising or falling beneath us, compensate for the
-            // estimated time of impact.
-            
-            int remainingSeconds = (int)calculatedTimeToImpact;
-            if (remainingSeconds != secondsUntilImpact)
+            // Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
+            // when someone pops a parachute gets stupidly noisy and makes for a bad experience.
+            // Just turn it off until I figure out a better solution. This can wait for
+            // a future update.
+            shouldDisplay &= (FlightGlobals.currentMainBody != null) && !FlightGlobals.currentMainBody.atmosphere;
+
+            double calculatedTimeToImpact = double.NaN;
+            if (shouldDisplay)
             {
-                secondsUntilImpact = remainingSeconds;
-                BurnInfo.TimeUntil = string.Format("{0} in {1} s", impactVerb, secondsUntilImpact);
+                calculatedTimeToImpact = CalculateTimeToImpact(FlightGlobals.ActiveVessel, out impactVerb, out impactSpeed);
+                if (calculatedTimeToImpact > maxTimeToImpact) shouldDisplay = false;
             }
+
+            if (shouldDisplay)
+            {
+                // A possible interesting future enhancement: use vessel.terrainNormal to deal better
+                // with landing on sloping terrain. Right now we're making the simplifying assumption
+                // that ground is flat, and the distance to fall is simply the ship's current height
+                // above the ground. The vector vessel.terrainNormal gives the vessel's orientation
+                // relative to the ground (i.e. <0,1,0> means "pointing straight away from the ground").
+                // We could use that to compensate for sloping ground, so that if we're traveling
+                // sideways and the ground is rising or falling beneath us, compensate for the
+                // estimated time of impact.
+                int remainingSeconds = (int)calculatedTimeToImpact;
+                if (remainingSeconds != secondsUntilImpact)
+                {
+                    secondsUntilImpact = remainingSeconds;
+                    impactDescription = string.Format("{0} in {1} s", impactVerb, secondsUntilImpact);
+                }
+            }
+            else
+            {
+                Reset();
+            }
+            return shouldDisplay;
         }
 
         private double GetVesselHeight()
@@ -133,26 +151,6 @@ namespace BetterBurnTime
                 lastVesselHeight = CalculateVesselHeight(FlightGlobals.ActiveVessel);
             }
             return lastVesselHeight;
-        }
-
-        /// <summary>
-        /// Determines whether the impact tracker should display.
-        /// </summary>
-        private bool ShouldDisplay
-        {
-            get
-            {
-                if (!displayEnabled) return false;
-                if (BurnInfo.OriginalDisplayEnabled) return false;
-
-                // Don't display for bodies with atmospheres. (Kind of a bummer, but acceleration
-                // when someone pops a parachute gets stupidly noisy and makes for a bad experience.
-                // Just turn it off until I figure out a better solution. This can wait for
-                // a future update.
-                if ((FlightGlobals.currentMainBody != null) && (FlightGlobals.currentMainBody.atmosphere)) return false;
-
-                return true;
-            }
         }
 
         private static bool IsTimeWarp
@@ -311,6 +309,20 @@ namespace BetterBurnTime
             impactSpeed = Math.Sqrt(verticalSpeedAtImpact * verticalSpeedAtImpact + vessel.horizontalSrfSpeed * vessel.horizontalSrfSpeed);
 
             return secondsUntilImpact;
+        }
+
+        private void Reset()
+        {
+            lastVesselHeight = double.NaN;
+            impactVerb = "N/A";
+            impactSpeed = double.NaN;
+            secondsUntilImpact = -1;
+            impactDescription = null;
+        }
+
+        private bool HasInfo
+        {
+            get { return !double.IsNaN(impactSpeed); }
         }
     }
 }

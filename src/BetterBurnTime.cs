@@ -33,9 +33,13 @@ namespace BetterBurnTime
         {
             PluginConfiguration config = PluginConfiguration.CreateForType<BetterBurnTime>();
             config.load();
-            useSimpleAcceleration = config.GetValue<bool>("UseSimpleAcceleration", false);
-            ImpactTracker.displayEnabled = config.GetValue<bool>("ShowImpactTracker", true);
-            ImpactTracker.maxTimeToImpact = config.GetValue<double>("MaxTimeToImpact", 120);
+            useSimpleAcceleration = config.GetValue<bool>("UseSimpleAcceleration", useSimpleAcceleration);
+            ImpactTracker.displayEnabled = config.GetValue<bool>("ShowImpactTracker", ImpactTracker.displayEnabled);
+            ImpactTracker.maxTimeToImpact = config.GetValue<double>("MaxTimeToImpact", ImpactTracker.maxTimeToImpact);
+            ClosestApproachTracker.displayEnabled = config.GetValue<bool>("ShowClosestApproachTracker", ClosestApproachTracker.displayEnabled);
+            ClosestApproachTracker.maxTimeUntilEncounter = config.GetValue<double>("MaxTimeUntilEncounter", ClosestApproachTracker.maxTimeUntilEncounter);
+            ClosestApproachTracker.maxClosestApproachDistanceKm = config.GetValue<double>("MaxClosestApproachDistanceKm", ClosestApproachTracker.maxClosestApproachDistanceKm);
+            ClosestApproachTracker.minTargetDistance = config.GetValue<double>("MinTargetDistanceMeters", ClosestApproachTracker.minTargetDistance);
             config.save();
             wasFuelCheat = CheatOptions.InfiniteFuel;
             if (useSimpleAcceleration)
@@ -67,7 +71,34 @@ namespace BetterBurnTime
             try
             {
                 if (!BurnInfo.IsInitialized) return; // can't do anything
-                double dVrequired = ImpactTracker.IsDisplayed ? ImpactTracker.ImpactSpeed : BurnInfo.DvRemaining;
+
+                string customDescription = null;
+                double dVrequired = ImpactTracker.ImpactSpeed;
+                if (double.IsNaN(dVrequired))
+                {
+                    // No impact info is available. Do we have closest-approach info?
+                    dVrequired = ClosestApproachTracker.Velocity;
+                    if (double.IsNaN(dVrequired))
+                    {
+                        // No closest-approach info available either, use the maneuver dV remaining.
+                        dVrequired = BurnInfo.DvRemaining;
+                    }
+                    else
+                    {
+                        // We have closest-approach info, use the description from that.
+                        customDescription = ClosestApproachTracker.Description;
+                    }
+                }
+                else
+                {
+                    // We have impact info, use the description from that.
+                    customDescription = ImpactTracker.Description;
+                }
+
+                // At this point, either we have a dVrequired or not. If we have one, we might
+                // have a description (meaning it's one of our custom trackers from this mod)
+                // or we might not (meaning "leave it alone at let the stock game decide what to say").
+
                 if (double.IsNaN(dVrequired)) return;
 
                 vessel.Refresh();
@@ -89,6 +120,17 @@ namespace BetterBurnTime
                     }
                 }
                 BurnInfo.Duration = lastUpdateText;
+                if (customDescription == null)
+                {
+                    // No custom description available, turn off the alternate display
+                    BurnInfo.AlternateDisplayEnabled = false;
+                }
+                else
+                {
+                    // We have alternate info to show
+                    BurnInfo.TimeUntil = customDescription;
+                    BurnInfo.AlternateDisplayEnabled = true;
+                }
             }
             catch (Exception e)
             {
