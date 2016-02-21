@@ -11,6 +11,23 @@ namespace BetterBurnTime
     {
         private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 250);
 
+        // Thanks to FullMetalMachinist of the KSP forums for the idea of showing a row
+        // of dots (with logarithmic falloff) for showing countdown.
+        private static readonly String[] COUNTDOWN_TEXT =
+        {
+            "",
+            "·",
+            "· ·",
+            "· · ·",
+            "· · · ·",
+            "· · · · ·",
+            "· · · · · ·",
+            "· · · · · · ·",
+            "· · · · · · · ·",
+            "· · · · · · · · ·",
+            "· · · · · · · · · ·",
+        };
+
         // the global instance of the object
         private static BurnInfo instance = null;
 
@@ -24,6 +41,8 @@ namespace BetterBurnTime
         private ScreenSafeGUIText originalTimeUntilText = null;
         private ScreenSafeGUIText alternateDurationText = null;
         private ScreenSafeGUIText alternateTimeUntilText = null;
+        private ScreenSafeGUIText countdownText = null;
+        private int countdown = 0;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -72,6 +91,34 @@ namespace BetterBurnTime
                 {
                     instance.alternateTimeUntilText.text = value;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the countdown level of the indicator (the number of dots displayed).
+        /// </summary>
+        public static int Countdown
+        {
+            get
+            {
+                return (instance == null) ? 0 : instance.countdown;
+            }
+            set
+            {
+                if (instance == null) return;
+                if (!instance.AttemptInitialize()) return;
+                int level = value;
+                if (level < 0)
+                {
+                    level = 0;
+                }
+                else if (level >= COUNTDOWN_TEXT.Length)
+                {
+                    level = COUNTDOWN_TEXT.Length - 1;
+                }
+                instance.countdown = level;
+                instance.countdownText.text = COUNTDOWN_TEXT[level];
+                instance.countdownText.enabled = level > 0;
             }
         }
 
@@ -162,12 +209,21 @@ namespace BetterBurnTime
             ScreenSafeGUIText theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
             if (theClonedTimeUntilText == null) return false;
 
+            ScreenSafeGUIText theCountdownText = CloneBehaviour(theBurnVector.ebtText);
+            if (theCountdownText == null) return false;
+            theCountdownText.enabled = false;
+            theCountdownText.transform.position = Interpolate(
+                theBurnVector.ebtText.transform.position,
+                theBurnVector.TdnText.transform.position,
+                0.5F);
+
             // Got everything we need!
             burnVector = theBurnVector;
             originalDurationText = burnVector.ebtText;
             originalTimeUntilText = burnVector.TdnText;
             alternateDurationText = theClonedDurationText;
             alternateTimeUntilText = theClonedTimeUntilText;
+            countdownText = theCountdownText;
             isInitialized = true;
 
             return true;
@@ -192,5 +248,20 @@ namespace BetterBurnTime
             return clonedBehaviour;
         }
 
+        /// <summary>
+        /// Provide a vector in between two others.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="amount">In the range 0 to 1.  0 = function returns "from", 1 = function returns "to", 0.5 = function returns midpoint</param>
+        /// <returns></returns>
+        private static Vector3 Interpolate(Vector3 from, Vector3 to, float amount)
+        {
+            float remainder = 1.0F - amount;
+            float x = (from.x * amount) + (to.x * remainder);
+            float y = (from.y * amount) + (to.y * remainder);
+            float z = (from.z * amount) + (to.z * remainder);
+            return new Vector3(x, y, z);
+        }
     }
 }

@@ -10,6 +10,9 @@ namespace BetterBurnTime
         // Treat any acceleration smaller than this as zero.
         private static readonly double ACCELERATION_EPSILON = 0.000001;
 
+        // Threshold levels in seconds for displaying countdown levels
+        private static readonly int[] COUNTDOWN_TIMES = { 0, 1, 2, 3, 5, 10, 30, 60, 120, 240, 480 };
+
         // Time thresholds for using various string formats
         private static readonly int THRESHOLD_SECONDS = 120;
         private static readonly int THRESHOLD_MINUTES_SECONDS = 120 * 60;
@@ -22,6 +25,7 @@ namespace BetterBurnTime
         private static readonly string ESTIMATED_BURN_LABEL = "Est. Burn: ";
 
         private bool useSimpleAcceleration = false;
+        private bool showCountdown = true;
         private bool wasFuelCheat = false;
         private int lastEngineCount;
         private ShipState vessel;
@@ -34,6 +38,7 @@ namespace BetterBurnTime
             PluginConfiguration config = PluginConfiguration.CreateForType<BetterBurnTime>();
             config.load();
             useSimpleAcceleration = config.GetValue<bool>("UseSimpleAcceleration", useSimpleAcceleration);
+            showCountdown = config.GetValue<bool>("ShowCountdown", showCountdown);
             ImpactTracker.displayEnabled = config.GetValue<bool>("ShowImpactTracker", ImpactTracker.displayEnabled);
             ImpactTracker.maxTimeToImpact = config.GetValue<double>("MaxTimeToImpact", ImpactTracker.maxTimeToImpact);
             ClosestApproachTracker.displayEnabled = config.GetValue<bool>("ShowClosestApproachTracker", ClosestApproachTracker.displayEnabled);
@@ -74,6 +79,7 @@ namespace BetterBurnTime
 
                 string customDescription = null;
                 double dVrequired = ImpactTracker.ImpactSpeed;
+                int timeUntil = -1;
                 if (double.IsNaN(dVrequired))
                 {
                     // No impact info is available. Do we have closest-approach info?
@@ -82,17 +88,21 @@ namespace BetterBurnTime
                     {
                         // No closest-approach info available either, use the maneuver dV remaining.
                         dVrequired = BurnInfo.DvRemaining;
+                        timeUntil = SecondsUntilNode();
                     }
                     else
                     {
                         // We have closest-approach info, use the description from that.
                         customDescription = ClosestApproachTracker.Description;
+                        timeUntil = ClosestApproachTracker.TimeUntil;
                     }
                 }
                 else
                 {
                     // We have impact info, use the description from that.
                     customDescription = ImpactTracker.Description;
+                    // TODO: enable countdown to retro-burn, not doing it now 'coz it needs more math & logic
+                    // timeUntil = ImpactTracker.TimeUntil;
                 }
 
                 // At this point, either we have a dVrequired or not. If we have one, we might
@@ -120,6 +130,7 @@ namespace BetterBurnTime
                     }
                 }
                 BurnInfo.Duration = lastUpdateText;
+                BurnInfo.Countdown = showCountdown ? CountdownLevelOf(timeUntil, burnSeconds) : 0;
                 if (customDescription == null)
                 {
                     // No custom description available, turn off the alternate display
@@ -356,6 +367,41 @@ namespace BetterBurnTime
         private static bool ShouldIgnore(string propellantName)
         {
             return "ElectricCharge".Equals(propellantName);
+        }
+
+        /// <summary>
+        /// Gets the time until the next maneuver node, in seconds. -1 if none.
+        /// </summary>
+        /// <returns></returns>
+        private static int SecondsUntilNode()
+        {
+            Vessel vessel = FlightGlobals.ActiveVessel;
+            if (vessel == null) return -1;
+            PatchedConicSolver solver = vessel.patchedConicSolver;
+            if (solver == null) return -1;
+            if ((solver.maneuverNodes == null) || (solver.maneuverNodes.Count == 0)) return -1;
+            ManeuverNode node = solver.maneuverNodes[0];
+            if (node == null) return -1;
+            double timeUntil = node.UT - Planetarium.GetUniversalTime();
+            if (timeUntil < 0) return -1;
+            return (int)timeUntil;
+        }
+
+        /// <summary>
+        /// Given the number of seconds until an event, decide on the countdown level
+        /// (i.e. number of dots) to display.
+        /// </summary>
+        /// <param name="secondsUntil"></param>
+        /// <returns></returns>
+        private static int CountdownLevelOf(int secondsUntil, int burnSeconds)
+        {
+            int timeUntilBurn = secondsUntil - burnSeconds / 2;
+            for (int level = 0; level < COUNTDOWN_TIMES.Length; ++level)
+            {
+                int time = COUNTDOWN_TIMES[level];
+                if (time >= timeUntilBurn) return level;
+            }
+            return COUNTDOWN_TIMES.Length - 1;
         }
     }
 }

@@ -48,6 +48,17 @@ The "estimated burn time" indicator provided by stock KSP is very rudimentary. I
 * It allows for engines that aren't parallel (e.g. if you have an active engine pointing the wrong way, it ups the estimate).
 
 
+## The "countdown" indicator
+For maneuver nodes and closest-approach, the mod displays a "countdown" indicator. This is a little row of green dots, immediately below the estimated burn time. This
+row of dots counts down until it's time to start your burn: when the last dot disappears, start the burn.
+
+The display is logarithmic.  Ten dots means you have 8 or more minutes until starting the burn. Counting down from ten dots, you have 4 minutes, 2 minutes, 1 minute, 30 seconds, 10 seconds, 5 seconds, 3, 2, 1, go.
+
+**Note:** No countdown indicator is currently shown for the "time to impact" indicator; this is because "when should I start?" is more complex, depending on a lot of factors including your descent angle, TWR, etc.  This feature may eventually be added, but until then, you're on your own.
+
+If you don't like this indicator, you can turn it off (see "How to configure", below).
+
+
 ## The "insufficient fuel" warning
 
 Normally, the mod displays estimated burn time like this (48 seconds in this example):
@@ -136,11 +147,11 @@ GameData/BetterBurnTime/PluginData/BetterBurnTime/config.xml
 The following settings are supported:
 
 * **UseSimpleAcceleration:** By default, this is set to 0, meaning that the mod will use complex acceleration in its calculations.  If you set it to 1, then you will force the mod to use simple acceleration for all its calculations all the time.
+* **ShowCountdown:** By default this is set to 1. If you set it to 0, this disables the "countdown" display (the little row of green dots showing countdown to when to start the burn).
 * **ShowImpactTracker:** By default, this is set to 1.  If you set it to 0, then you will disable the "time to impact" display.
 * **MaxTimeToImpact:** This is the maximum time, in seconds, that the impact tracker will predict a collision with terrain.  By default, it's 120 (two minutes). You can raise or lower this.  (Has no effect if ShowImpactTracker is set to 0, since then all impact tracking is turned off.)
 * **ShowClosestApproachTracker:** By default, this is set to 1. If you set it to 0, then you will disable the "time until closest approach" display.
 * **MaxTimeUntilEncounter:** This is the maximum time, in seconds, that the closest-approach tracker will predict a closest approach. By default, it's 900 (fifteen minutes).
 * **MaxClosestApproachDistanceKm:** This is the maximum distance, in kilometers, that a closest approach can be for the closest-approach tracker to show a prediction. By default, it's 10 km.
 * **MinTargetDistanceMeters:** The target must be at least this many meters away from your ship for the closest-approach tracker to show a prediction. By default, it's 200 meters.
-
 

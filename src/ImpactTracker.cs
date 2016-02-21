@@ -98,6 +98,14 @@ namespace BetterBurnTime
         }
 
         /// <summary>
+        /// Gets the time until impact, in seconds.  -1 if not available.
+        /// </summary>
+        public static int TimeUntil
+        {
+            get { return (instance == null) ? -1 : instance.secondsUntilImpact;  }
+        }
+
+        /// <summary>
         /// Do necessary calculations around impact tracking. Returns true if there's anything to display.
         /// </summary>
         /// <returns></returns>

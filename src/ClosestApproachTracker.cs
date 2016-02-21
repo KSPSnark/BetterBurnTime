@@ -130,6 +130,14 @@ namespace BetterBurnTime
         }
 
         /// <summary>
+        /// Gets the time until closest approach, in seconds.  -1 if not available.
+        /// </summary>
+        public static int TimeUntil
+        {
+            get { return (instance == null) ? -1 : instance.secondsUntilClosestApproach; }
+        }
+
+        /// <summary>
         /// Reset the tracker and clear out all info.
         /// </summary>
         private void Reset()
