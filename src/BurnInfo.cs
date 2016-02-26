@@ -11,23 +11,6 @@ namespace BetterBurnTime
     {
         private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 250);
 
-        // Thanks to FullMetalMachinist of the KSP forums for the idea of showing a row
-        // of dots (with logarithmic falloff) for showing countdown.
-        private static readonly String[] COUNTDOWN_TEXT =
-        {
-            "",
-            "·",
-            "· ·",
-            "· · ·",
-            "· · · ·",
-            "· · · · ·",
-            "· · · · · ·",
-            "· · · · · · ·",
-            "· · · · · · · ·",
-            "· · · · · · · · ·",
-            "· · · · · · · · · ·",
-        };
-
         // the global instance of the object
         private static BurnInfo instance = null;
 
@@ -42,7 +25,6 @@ namespace BetterBurnTime
         private ScreenSafeGUIText alternateDurationText = null;
         private ScreenSafeGUIText alternateTimeUntilText = null;
         private ScreenSafeGUIText countdownText = null;
-        private int countdown = 0;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -97,28 +79,14 @@ namespace BetterBurnTime
         /// <summary>
         /// Gets or sets the countdown level of the indicator (the number of dots displayed).
         /// </summary>
-        public static int Countdown
+        public static string Countdown
         {
-            get
-            {
-                return (instance == null) ? 0 : instance.countdown;
-            }
             set
             {
                 if (instance == null) return;
                 if (!instance.AttemptInitialize()) return;
-                int level = value;
-                if (level < 0)
-                {
-                    level = 0;
-                }
-                else if (level >= COUNTDOWN_TEXT.Length)
-                {
-                    level = COUNTDOWN_TEXT.Length - 1;
-                }
-                instance.countdown = level;
-                instance.countdownText.text = COUNTDOWN_TEXT[level];
-                instance.countdownText.enabled = level > 0;
+                instance.countdownText.text = value;
+                instance.countdownText.enabled = value.Length > 0;
             }
         }
 

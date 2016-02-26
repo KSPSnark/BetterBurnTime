@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using KSP.IO;
 
 namespace BetterBurnTime
 {
@@ -10,22 +9,15 @@ namespace BetterBurnTime
         // Treat any acceleration smaller than this as zero.
         private static readonly double ACCELERATION_EPSILON = 0.000001;
 
-        // Threshold levels in seconds for displaying countdown levels
-        private static readonly int[] COUNTDOWN_TIMES = { 0, 1, 2, 3, 5, 10, 30, 60, 120, 240, 480 };
-
-        // Time thresholds for using various string formats
-        private static readonly int THRESHOLD_SECONDS = 120;
-        private static readonly int THRESHOLD_MINUTES_SECONDS = 120 * 60;
-        private static readonly int THRESHOLD_HOURS_MINUTES_SECONDS = 6 * 60 * 60;
-        private static readonly int THRESHOLD_HOURS_MINUTES = 4 * THRESHOLD_HOURS_MINUTES_SECONDS;
-
         // Kerbin gravity, needed for working with Isp
         private static readonly double KERBIN_GRAVITY = 9.81;
 
         private static readonly string ESTIMATED_BURN_LABEL = "Est. Burn: ";
 
-        private bool useSimpleAcceleration = false;
-        private bool showCountdown = true;
+        // Configurable values
+        private static readonly bool useSimpleAcceleration = Configuration.useSimpleAcceleration;
+
+        // Other private data
         private bool wasFuelCheat = false;
         private int lastEngineCount;
         private ShipState vessel;
@@ -35,17 +27,6 @@ namespace BetterBurnTime
 
         public void Start()
         {
-            PluginConfiguration config = PluginConfiguration.CreateForType<BetterBurnTime>();
-            config.load();
-            useSimpleAcceleration = config.GetValue<bool>("UseSimpleAcceleration", useSimpleAcceleration);
-            showCountdown = config.GetValue<bool>("ShowCountdown", showCountdown);
-            ImpactTracker.displayEnabled = config.GetValue<bool>("ShowImpactTracker", ImpactTracker.displayEnabled);
-            ImpactTracker.maxTimeToImpact = config.GetValue<double>("MaxTimeToImpact", ImpactTracker.maxTimeToImpact);
-            ClosestApproachTracker.displayEnabled = config.GetValue<bool>("ShowClosestApproachTracker", ClosestApproachTracker.displayEnabled);
-            ClosestApproachTracker.maxTimeUntilEncounter = config.GetValue<double>("MaxTimeUntilEncounter", ClosestApproachTracker.maxTimeUntilEncounter);
-            ClosestApproachTracker.maxClosestApproachDistanceKm = config.GetValue<double>("MaxClosestApproachDistanceKm", ClosestApproachTracker.maxClosestApproachDistanceKm);
-            ClosestApproachTracker.minTargetDistance = config.GetValue<double>("MinTargetDistanceMeters", ClosestApproachTracker.minTargetDistance);
-            config.save();
             wasFuelCheat = CheatOptions.InfiniteFuel;
             if (useSimpleAcceleration)
             {
@@ -119,18 +100,17 @@ namespace BetterBurnTime
                 if (burnSeconds != lastBurnTime)
                 {
                     lastBurnTime = burnSeconds;
-                    string burnLabel = FormatBurnTime(burnSeconds);
-                    lastUpdateText = ESTIMATED_BURN_LABEL + FormatBurnTime(burnSeconds);
                     if (isInsufficientFuel)
                     {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + "(~" + burnLabel + ")";
-                    } else
+                        lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.warn(burnSeconds);
+                    }
+                    else
                     {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + burnLabel;
+                        lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.format(burnSeconds);
                     }
                 }
                 BurnInfo.Duration = lastUpdateText;
-                BurnInfo.Countdown = showCountdown ? CountdownLevelOf(timeUntil, burnSeconds) : 0;
+                BurnInfo.Countdown = Countdown.ForSeconds(timeUntil - burnSeconds / 2);
                 if (customDescription == null)
                 {
                     // No custom description available, turn off the alternate display
@@ -169,51 +149,6 @@ namespace BetterBurnTime
                         Logging.Log("Infinite fuel cheat deactivated. Will use complex acceleration model.");
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Given a burn time in seconds, get a string representation.
-        /// </summary>
-        /// <param name="totalSeconds"></param>
-        /// <returns></returns>
-        private static string FormatBurnTime(int totalSeconds)
-        {
-            if (totalSeconds < 0)
-            {
-                return "N/A";
-            }
-            if (totalSeconds == 0)
-            {
-                return "<1s";
-            }
-            if (totalSeconds <= THRESHOLD_SECONDS)
-            {
-                return totalSeconds.ToString("#s");
-            }
-            else if (totalSeconds <= THRESHOLD_MINUTES_SECONDS)
-            {
-                int minutes = totalSeconds / 60;
-                int seconds = totalSeconds % 60;
-                return string.Format("{0}m{1}s", minutes, seconds);
-            }
-            else if (totalSeconds <= THRESHOLD_HOURS_MINUTES_SECONDS)
-            {
-                int hours = totalSeconds / 3600;
-                int minutes = (totalSeconds % 3600) / 60;
-                int seconds = totalSeconds % 60;
-                return string.Format("{0}h{1}m{2}s", hours, minutes, seconds);
-            }
-            else if (totalSeconds <= THRESHOLD_HOURS_MINUTES)
-            {
-                int hours = totalSeconds / 3600;
-                int minutes = (totalSeconds % 3600) / 60;
-                return string.Format("{0}h{1}m", hours, minutes);
-            }
-            else
-            {
-                int hours = THRESHOLD_HOURS_MINUTES / 3600;
-                return hours.ToString(">#h");
             }
         }
 
@@ -292,7 +227,13 @@ namespace BetterBurnTime
                     double engineKilonewtons = engine.maxThrust * engine.thrustPercentage * 0.01;
                     if (!CheatOptions.InfiniteFuel)
                     {
-                        double engineTotalFuelConsumption = engineKilonewtons / (KERBIN_GRAVITY * engine.realIsp); // tons/sec
+                        // Get the vacuum Isp this way, rather than ask for engine.realIsp, because
+                        // there are mods that tinker with the atmosphere curve, which changes the
+                        // actual Isp that the game uses for vacuum without updating engine.realIsp.
+                        // Thanks to smjjames in the KSP forums for pointing out this bug.
+                        double engineIsp = engine.atmosphereCurve.Evaluate(0);
+
+                        double engineTotalFuelConsumption = engineKilonewtons / (KERBIN_GRAVITY * engineIsp); // tons/sec
                         double ratioSum = 0.0;
                         bool isStarved = false;
                         foreach (Propellant propellant in engine.propellants)
@@ -385,23 +326,6 @@ namespace BetterBurnTime
             double timeUntil = node.UT - Planetarium.GetUniversalTime();
             if (timeUntil < 0) return -1;
             return (int)timeUntil;
-        }
-
-        /// <summary>
-        /// Given the number of seconds until an event, decide on the countdown level
-        /// (i.e. number of dots) to display.
-        /// </summary>
-        /// <param name="secondsUntil"></param>
-        /// <returns></returns>
-        private static int CountdownLevelOf(int secondsUntil, int burnSeconds)
-        {
-            int timeUntilBurn = secondsUntil - burnSeconds / 2;
-            for (int level = 0; level < COUNTDOWN_TIMES.Length; ++level)
-            {
-                int time = COUNTDOWN_TIMES[level];
-                if (time >= timeUntilBurn) return level;
-            }
-            return COUNTDOWN_TIMES.Length - 1;
         }
     }
 }

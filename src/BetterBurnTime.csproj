@@ -48,12 +48,15 @@
     <Compile Include="BetterBurnTime.cs" />
     <Compile Include="BurnInfo.cs" />
     <Compile Include="ClosestApproachTracker.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Countdown.cs" />
     <Compile Include="ImpactTracker.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="ShipState.cs" />
     <Compile Include="Tally.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Propulsion.cs" />
+    <Compile Include="TimeFormatter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

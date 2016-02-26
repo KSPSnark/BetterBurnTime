@@ -31,12 +31,12 @@ namespace BetterBurnTime
         /// <summary>
         /// Global setting for whether impact tracking is enabled.
         /// </summary>
-        public static bool displayEnabled = true;
+        private static readonly bool displayEnabled = Configuration.showImpact;
 
         /// <summary>
         /// If calculated time to impact is greater than this many seconds, don't track.
         /// </summary>
-        public static double maxTimeToImpact = 120.0;
+        private static readonly double maxTimeToImpact = Configuration.impactMaxTimeUntil;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -140,7 +140,7 @@ namespace BetterBurnTime
                 if (remainingSeconds != secondsUntilImpact)
                 {
                     secondsUntilImpact = remainingSeconds;
-                    impactDescription = string.Format("{0} in {1} s", impactVerb, secondsUntilImpact);
+                    impactDescription = string.Format("{0} in {1}", impactVerb, TimeFormatter.Default.format(secondsUntilImpact));
                 }
             }
             else
@@ -167,17 +167,6 @@ namespace BetterBurnTime
             {
                 return (TimeWarp.WarpMode == TimeWarp.Modes.HIGH) || (TimeWarp.CurrentRate > 1.0);
             }
-        }
-
-        private static string ToString(Vector3d vector)
-        {
-            if (vector == null) return "null";
-            return string.Format(
-                "<{0:####0.000},{1:####0.000},{2:####0.000}> ({3:####0.000})", 
-                vector.x,
-                vector.y,
-                vector.z,
-                vector.magnitude);
         }
 
         /// <summary>

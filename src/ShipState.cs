@@ -38,6 +38,7 @@ namespace BetterBurnTime
             }
             lastUpdateTime = DateTime.Now;
             Vessel vessel = FlightGlobals.ActiveVessel;
+            if (vessel == null) return;
             vesselId = vessel.id;
             vesselPartCount = vessel.parts.Count;
             totalMass = vessel.GetTotalMass();

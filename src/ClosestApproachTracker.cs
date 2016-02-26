@@ -27,22 +27,22 @@ namespace BetterBurnTime
         /// <summary>
         /// Global setting for whether closest approach tracking is enabled.
         /// </summary>
-        public static bool displayEnabled = true;
+        private static readonly bool displayEnabled = Configuration.showClosestApproach;
 
         /// <summary>
         /// If calculated closest-approach distance is greater than this, don't track.
         /// </summary>
-        public static double maxClosestApproachDistanceKm = 10.0;
+        private static readonly double maxClosestApproachDistanceKm = Configuration.closestApproachMaxDistanceKm;
 
         /// <summary>
         /// If calculated closest-approach distance is greater than this, don't track.
         /// </summary>
-        public static double maxTimeUntilEncounter = 900.0;
+        private static readonly double maxTimeUntilEncounter = Configuration.closestApproachMaxTimeUntilEncounter;
 
         /// <summary>
         /// If the target is closer than this many meters, don't track.
         /// </summary>
-        public static double minTargetDistance = 200.0;
+        private static readonly double minTargetDistance = Configuration.closestApproachMinTargetDistance;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -83,9 +83,9 @@ namespace BetterBurnTime
                         secondsUntilClosestApproach = timeUntil;
                         hundredsMetersDistance = distance100;
                         approachDescription = string.Format(
-                            "Target@{0:F1}km in {1} s",
+                            "Target@{0:F1}km in {1}",
                             0.1 * (double)hundredsMetersDistance,
-                            secondsUntilClosestApproach);
+                            TimeFormatter.Default.format(secondsUntilClosestApproach));
                     }
                 } else
                 {
