@@ -14,6 +14,9 @@ namespace BetterBurnTime
 
         private static readonly string ESTIMATED_BURN_LABEL = "Est. Burn: ";
 
+        // Displayed in place of burn time when it's an EVA kerbal.
+        private static readonly string EVA_KERBAL_LABEL = string.Empty;
+
         // Configurable values
         private static readonly bool useSimpleAcceleration = Configuration.useSimpleAcceleration;
 
@@ -92,25 +95,36 @@ namespace BetterBurnTime
 
                 if (double.IsNaN(dVrequired)) return;
 
-                vessel.Refresh();
-                propellantsConsumed = new Tally();
-                bool isInsufficientFuel;
-                double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
-                int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
-                if (burnSeconds != lastBurnTime)
+                if (IsEvaKerbal(FlightGlobals.ActiveVessel))
                 {
-                    lastBurnTime = burnSeconds;
-                    if (isInsufficientFuel)
-                    {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.warn(burnSeconds);
-                    }
-                    else
-                    {
-                        lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.format(burnSeconds);
-                    }
+                    // it's a kerbal on EVA
+                    BurnInfo.Duration = EVA_KERBAL_LABEL;
+                    BurnInfo.Countdown = string.Empty;
                 }
-                BurnInfo.Duration = lastUpdateText;
-                BurnInfo.Countdown = Countdown.ForSeconds(timeUntil - burnSeconds / 2);
+                else
+                {
+                    // it's a ship, not an EVA kerbal
+                    vessel.Refresh();
+                    propellantsConsumed = new Tally();
+                    bool isInsufficientFuel;
+                    double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
+                    int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
+                    if (burnSeconds != lastBurnTime)
+                    {
+                        lastBurnTime = burnSeconds;
+                        if (isInsufficientFuel)
+                        {
+                            lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.warn(burnSeconds);
+                        }
+                        else
+                        {
+                            lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.format(burnSeconds);
+                        }
+                    }
+                    BurnInfo.Duration = lastUpdateText;
+                    BurnInfo.Countdown = Countdown.ForSeconds(timeUntil - burnSeconds / 2);
+                }
+
                 if (customDescription == null)
                 {
                     // No custom description available, turn off the alternate display
@@ -220,11 +234,12 @@ namespace BetterBurnTime
             propellantsConsumed.Zero();
             Tally availableResources = vessel.AvailableResources;
             int engineCount = 0;
-            foreach (ModuleEngines engine in vessel.ActiveEngines)
+            for (int engineIndex = 0; engineIndex < vessel.ActiveEngines.Count; ++engineIndex)
             {
+                ModuleEngines engine = vessel.ActiveEngines[engineIndex];
                 if (engine.thrustPercentage > 0)
                 {
-                    double engineKilonewtons = engine.maxThrust * engine.thrustPercentage * 0.01;
+                    double engineKilonewtons = engine.ThrustLimit();
                     if (!CheatOptions.InfiniteFuel)
                     {
                         // Get the vacuum Isp this way, rather than ask for engine.realIsp, because
@@ -236,8 +251,9 @@ namespace BetterBurnTime
                         double engineTotalFuelConsumption = engineKilonewtons / (KERBIN_GRAVITY * engineIsp); // tons/sec
                         double ratioSum = 0.0;
                         bool isStarved = false;
-                        foreach (Propellant propellant in engine.propellants)
+                        for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
                         {
+                            Propellant propellant = engine.propellants[propellantIndex];
                             if (!ShouldIgnore(propellant.name))
                             {
                                 if (!availableResources.Has(propellant.name))
@@ -252,8 +268,9 @@ namespace BetterBurnTime
                         if (ratioSum > 0)
                         {
                             double ratio = 1.0 / ratioSum;
-                            foreach (Propellant propellant in engine.propellants)
+                            for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
                             {
+                                Propellant propellant = engine.propellants[propellantIndex];
                                 if (!ShouldIgnore(propellant.name))
                                 {
                                     double consumptionRate = ratio * propellant.ratio * engineTotalFuelConsumption; // tons/sec
@@ -263,7 +280,7 @@ namespace BetterBurnTime
                         }
                     } // if we need to worry about fuel
                     ++engineCount;
-                    totalThrustVector += Propulsion.ForwardOf(engine) * (float)engineKilonewtons;
+                    totalThrustVector += engine.Forward() * (float)engineKilonewtons;
                 } // if the engine is operational
             } // for each engine module on the part
             totalThrust = totalThrustVector.magnitude;
@@ -326,6 +343,16 @@ namespace BetterBurnTime
             double timeUntil = node.UT - Planetarium.GetUniversalTime();
             if (timeUntil < 0) return -1;
             return (int)timeUntil;
+        }
+
+        /// <summary>
+        /// Determines whether the specified vessel is a kerbal on EVA.
+        /// </summary>
+        private static bool IsEvaKerbal(Vessel vessel)
+        {
+            if (vessel == null) return false;
+            if (vessel.parts.Count > 1) return false;
+            return vessel.parts[0].HasModule<KerbalEVA>();
         }
     }
 }

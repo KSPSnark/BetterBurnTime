@@ -50,6 +50,7 @@
     <Compile Include="ClosestApproachTracker.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Countdown.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="ImpactTracker.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="ShipState.cs" />

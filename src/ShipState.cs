@@ -43,16 +43,20 @@ namespace BetterBurnTime
             vesselPartCount = vessel.parts.Count;
             totalMass = vessel.GetTotalMass();
             activeEngines.Clear();
-            foreach (Part part in Propulsion.Engines)
+            for (int engineIndex = 0; engineIndex < Propulsion.Engines.Count; ++engineIndex)
             {
-                foreach (ModuleEngines engine in part.Modules.GetModules<ModuleEngines>())
+                Part part = Propulsion.Engines[engineIndex];
+                for (int moduleIndex = 0; moduleIndex < part.Modules.Count; ++moduleIndex)
                 {
+                    ModuleEngines engine = part.Modules[moduleIndex] as ModuleEngines;
+                    if (engine == null) continue;
                     if (!engine.isOperational) continue;
                     if (!CheatOptions.InfiniteFuel)
                     {
                         bool isDeprived = false;
-                        foreach (Propellant propellant in engine.propellants)
+                        for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
                         {
+                            Propellant propellant = engine.propellants[propellantIndex];
                             if (propellant.isDeprived && !propellant.ignoreForIsp)
                             {
                                 isDeprived = true; // out of fuel!
@@ -66,10 +70,12 @@ namespace BetterBurnTime
             }
 
             availableResources = new Tally();
-            foreach (Part part in Propulsion.Tanks)
+            for (int tankIndex = 0; tankIndex < Propulsion.Tanks.Count; ++tankIndex)
             {
-                foreach (PartResource resource in part.Resources)
+                Part part = Propulsion.Tanks[tankIndex];
+                for (int resourceIndex = 0; resourceIndex < part.Resources.Count; ++resourceIndex)
                 {
+                    PartResource resource = part.Resources[resourceIndex];
                     if (resource.flowState)
                     {
                         availableResources.Add(resource.resourceName, resource.amount * resource.info.density);

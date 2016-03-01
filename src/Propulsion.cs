@@ -80,31 +80,16 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets a unit vector pointing in the engine's "forward" direction (opposite its thrust direction).
-        /// </summary>
-        /// <param name="engine"></param>
-        /// <returns></returns>
-        public static Vector3 ForwardOf(ModuleEngines engine)
-        {
-            Vector3 sum = Vector3.zero;
-            if (engine.thrustTransforms.Count == 0) return sum;
-            foreach (Transform transform in engine.thrustTransforms)
-            {
-                sum += transform.forward;
-            }
-            return sum.normalized;
-        }
-
-        /// <summary>
         /// Build a list of all engines on the vessel.
         /// </summary>
         /// <param name="vessel"></param>
         private void ListEngines(Vessel vessel)
         {
             engines.Clear();
-            foreach (Part part in vessel.parts)
+            for (int index = 0; index < vessel.parts.Count; ++index)
             {
-                if (part.Modules.GetModules<ModuleEngines>().Count > 0)
+                Part part = vessel.parts[index];
+                if (part.HasModule<ModuleEngines>())
                 {
                     engines.Add(part);
                 }
@@ -119,8 +104,9 @@ namespace BetterBurnTime
         {
             // Build a list of all tanks that contain any resources of nonzero mass
             tanks.Clear();
-            foreach (Part part in vessel.parts)
+            for (int index = 0; index < vessel.parts.Count; ++index)
             {
+                Part part = vessel.parts[index];
                 if (HasAnyResources(part))
                 {
                     tanks.Add(part);
@@ -136,9 +122,9 @@ namespace BetterBurnTime
         /// <returns></returns>
         private static bool HasAnyResources(Part part)
         {
-            foreach (PartResource resource in part.Resources)
+            for (int index = 0; index < part.Resources.Count; ++index)
             {
-                if (resource.info.density > 0) return true;
+                if (part.Resources[index].info.density > 0) return true;
             }
             return false;
         }

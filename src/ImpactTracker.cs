@@ -190,8 +190,9 @@ namespace BetterBurnTime
             List<Part> parts = ChooseParts(vessel);
             double minPartPosition = double.PositiveInfinity;
             Part lowestPart = null;
-            foreach (Part part in parts)
+            for (int partIndex = 0; partIndex < parts.Count; ++partIndex)
             {
+                Part part = parts[partIndex];
                 if (!part.collider.enabled) continue;
                 double partPosition = Vector3.Distance(
                     part.collider.ClosestPointOnBounds(vessel.mainBody.position),
@@ -222,8 +223,9 @@ namespace BetterBurnTime
 
             // Pick the 30 lowest-altitude parts and use those.
             List<PartAltitude> partAltitudes = new List<PartAltitude>(vessel.parts.Count);
-            foreach (Part part in vessel.parts)
+            for (int partIndex = 0; partIndex < vessel.parts.Count; ++partIndex)
             {
+                Part part = vessel.parts[partIndex];
                 if (part.collider.enabled) partAltitudes.Add(
                     new PartAltitude() { p = part, alt = Vector3.Distance(part.transform.position, vessel.mainBody.position) });
             }
