@@ -25,6 +25,7 @@ namespace BetterBurnTime
         private double lastVesselHeight;
         private int secondsUntilImpact = -1;
         private string impactVerb;
+        private Part lowestPart;
         private double impactSpeed;
         private string impactDescription;
 
@@ -150,14 +151,15 @@ namespace BetterBurnTime
             return shouldDisplay;
         }
 
-        private double GetVesselHeight()
+        private double GetVesselHeight(out Part currentLowestPart)
         {
             DateTime now = DateTime.Now;
             if (double.IsNaN(lastVesselHeight) || (now - lastVesselHeightUpdate > UPDATE_INTERVAL))
             {
                 lastVesselHeightUpdate = now;
-                lastVesselHeight = CalculateVesselHeight(FlightGlobals.ActiveVessel);
+                lastVesselHeight = CalculateVesselHeight(FlightGlobals.ActiveVessel, out lowestPart);
             }
+            currentLowestPart = lowestPart;
             return lastVesselHeight;
         }
 
@@ -165,7 +167,7 @@ namespace BetterBurnTime
         {
             get
             {
-                return (TimeWarp.WarpMode == TimeWarp.Modes.HIGH) || (TimeWarp.CurrentRate > 1.0);
+                return (TimeWarp.WarpMode == TimeWarp.Modes.HIGH) && (TimeWarp.CurrentRate > 1.0);
             }
         }
 
@@ -184,12 +186,12 @@ namespace BetterBurnTime
         /// every frame).
         /// </summary>
         /// <returns></returns>
-        private static double CalculateVesselHeight(Vessel vessel)
+        private static double CalculateVesselHeight(Vessel vessel, out Part lowestPart)
         {
+            lowestPart = null;
             if (IsTimeWarp) return 0.0; // vessel is packed, can't do anything
             List<Part> parts = ChooseParts(vessel);
             double minPartPosition = double.PositiveInfinity;
-            Part lowestPart = null;
             for (int partIndex = 0; partIndex < parts.Count; ++partIndex)
             {
                 Part part = parts[partIndex];
@@ -203,6 +205,7 @@ namespace BetterBurnTime
                     lowestPart = part;
                 }
             }
+            if (lowestPart == null) return 0.0; // no usable parts
             double vesselPosition = Vector3.Distance(
                 //vessel.GetReferenceTransformPart().transform.position,
                 vessel.transform.position,
@@ -262,11 +265,13 @@ namespace BetterBurnTime
             if (periapsis > (vessel.mainBody.Radius + lowestWarpAltitude)) return double.PositiveInfinity;
 
             // How far do we need to fall to hit ground?
-            double clearance = vessel.altitude - vessel.pqsAltitude - GetVesselHeight();
+            Part currentLowestPart = null;
+            double clearance = vessel.altitude - vessel.pqsAltitude - GetVesselHeight(out currentLowestPart);
             verb = "Impact";
 
             // If we're over water, use water surface instead of ocean floor.
-            if (vessel.mainBody.ocean && (clearance > vessel.altitude))
+            bool isWater = vessel.mainBody.ocean && (clearance > vessel.altitude);
+            if (isWater)
             {
                 clearance = vessel.altitude;
                 verb = "Splash";
@@ -287,12 +292,6 @@ namespace BetterBurnTime
             // TODO: If we eventually allow impact-tracking while in atmosphere, we need to do something more
             // complex to allow for atmospheric forces.
 
-            if (Math.Abs(downwardAcceleration) < 0.01)
-            {
-                // Just about zero acceleration, use a simple velocity calculation.
-                return clearance / fallSpeed;
-            }
-
             // If our downward acceleration is negative (i.e. net acceleration is upward), there's
             // a chance we may not be due to hit the ground at all. Check for that.
             if (downwardAcceleration < 0)
@@ -306,6 +305,10 @@ namespace BetterBurnTime
 
             double verticalSpeedAtImpact = fallSpeed + secondsUntilImpact * downwardAcceleration;
             impactSpeed = Math.Sqrt(verticalSpeedAtImpact * verticalSpeedAtImpact + vessel.horizontalSrfSpeed * vessel.horizontalSrfSpeed);
+            if (!isWater && (lowestPart != null) && (impactSpeed <= lowestPart.crashTolerance))
+            {
+                verb = "Touchdown";
+            }
 
             return secondsUntilImpact;
         }
@@ -314,6 +317,7 @@ namespace BetterBurnTime
         {
             lastVesselHeight = double.NaN;
             impactVerb = "N/A";
+            lowestPart = null;
             impactSpeed = double.NaN;
             secondsUntilImpact = -1;
             impactDescription = null;

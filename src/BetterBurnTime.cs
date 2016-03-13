@@ -242,11 +242,12 @@ namespace BetterBurnTime
                     double engineKilonewtons = engine.ThrustLimit();
                     if (!CheatOptions.InfiniteFuel)
                     {
-                        // Get the vacuum Isp this way, rather than ask for engine.realIsp, because
-                        // there are mods that tinker with the atmosphere curve, which changes the
-                        // actual Isp that the game uses for vacuum without updating engine.realIsp.
-                        // Thanks to smjjames in the KSP forums for pointing out this bug.
-                        double engineIsp = engine.atmosphereCurve.Evaluate(0);
+                        // Possible future consideraiton:
+                        // Get the vacuum Isp from engine.atmosphereCurve.Evaluate(0), rather than ask
+                        // for engine.realIsp, because there may be mods that tinker with the atmosphere
+                        // curve, which changes the actual Isp that the game uses for vacuum without
+                        // updating engine.realIsp.
+                        double engineIsp = engine.realIsp;
 
                         double engineTotalFuelConsumption = engineKilonewtons / (KERBIN_GRAVITY * engineIsp); // tons/sec
                         double ratioSum = 0.0;
