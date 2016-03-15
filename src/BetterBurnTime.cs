@@ -352,7 +352,7 @@ namespace BetterBurnTime
         private static bool IsEvaKerbal(Vessel vessel)
         {
             if (vessel == null) return false;
-            if (vessel.parts.Count > 1) return false;
+            if (vessel.parts.Count != 1) return false;
             return vessel.parts[0].HasModule<KerbalEVA>();
         }
     }
