@@ -190,6 +190,7 @@ namespace BetterBurnTime
         {
             lowestPart = null;
             if (IsTimeWarp) return 0.0; // vessel is packed, can't do anything
+            if (vessel.IsEvaKerbal()) return 0.0; // we don't do this for kerbals
             List<Part> parts = ChooseParts(vessel);
             double minPartPosition = double.PositiveInfinity;
             for (int partIndex = 0; partIndex < parts.Count; ++partIndex)

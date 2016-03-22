@@ -94,8 +94,9 @@ namespace BetterBurnTime
                 // or we might not (meaning "leave it alone at let the stock game decide what to say").
 
                 if (double.IsNaN(dVrequired)) return;
+                if (FlightGlobals.ActiveVessel == null) return;
 
-                if (IsEvaKerbal(FlightGlobals.ActiveVessel))
+                if (FlightGlobals.ActiveVessel.IsEvaKerbal())
                 {
                     // it's a kerbal on EVA
                     BurnInfo.Duration = EVA_KERBAL_LABEL;
@@ -344,16 +345,6 @@ namespace BetterBurnTime
             double timeUntil = node.UT - Planetarium.GetUniversalTime();
             if (timeUntil < 0) return -1;
             return (int)timeUntil;
-        }
-
-        /// <summary>
-        /// Determines whether the specified vessel is a kerbal on EVA.
-        /// </summary>
-        private static bool IsEvaKerbal(Vessel vessel)
-        {
-            if (vessel == null) return false;
-            if (vessel.parts.Count != 1) return false;
-            return vessel.parts[0].HasModule<KerbalEVA>();
         }
     }
 }

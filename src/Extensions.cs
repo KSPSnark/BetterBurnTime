@@ -16,6 +16,7 @@ namespace BetterBurnTime
         /// <returns></returns>
         public static bool HasModule<T> (this Part part) where T : PartModule
         {
+            if (part == null) return false;
             for (int index = 0; index < part.Modules.Count; ++index)
             {
                 if (part.Modules[index] is T) return true;
@@ -32,7 +33,7 @@ namespace BetterBurnTime
         public static Vector3 Forward(this ModuleEngines engine)
         {
             Vector3 sum = Vector3.zero;
-            if (engine.thrustTransforms.Count == 0) return sum;
+            if ((engine == null) || (engine.thrustTransforms.Count == 0)) return sum;
             for (int index = 0; index < engine.thrustTransforms.Count; ++index)
             {
                 sum += engine.thrustTransforms[index].forward;
@@ -47,7 +48,18 @@ namespace BetterBurnTime
         /// <returns></returns>
         public static double ThrustLimit(this ModuleEngines engine)
         {
+            if (engine == null) return 0.0;
             return engine.minThrust + (engine.maxThrust - engine.minThrust) * engine.thrustPercentage * 0.01;
+        }
+
+        /// <summary>
+        /// Determines whether the specified vessel is a kerbal on EVA.
+        /// </summary>
+        public static bool IsEvaKerbal(this Vessel vessel)
+        {
+            if (vessel == null) return false;
+            if (vessel.parts.Count != 1) return false;
+            return vessel.parts[0].HasModule<KerbalEVA>();
         }
     }
 }
