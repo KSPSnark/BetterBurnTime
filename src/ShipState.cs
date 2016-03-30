@@ -51,7 +51,7 @@ namespace BetterBurnTime
                     ModuleEngines engine = part.Modules[moduleIndex] as ModuleEngines;
                     if (engine == null) continue;
                     if (!engine.isOperational) continue;
-                    if (!CheatOptions.InfiniteFuel)
+                    if (!CheatOptions.InfinitePropellant)
                     {
                         bool isDeprived = false;
                         for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
@@ -114,6 +114,7 @@ namespace BetterBurnTime
             if (now - lastUpdateTime > updateInterval) return true;
 
             Vessel vessel = FlightGlobals.ActiveVessel;
+            if (vessel == null) return false;
             return (vessel.id != vesselId) || (vessel.parts.Count != vesselPartCount);
         }
     }

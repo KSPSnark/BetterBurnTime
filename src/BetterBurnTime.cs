@@ -30,7 +30,7 @@ namespace BetterBurnTime
 
         public void Start()
         {
-            wasFuelCheat = CheatOptions.InfiniteFuel;
+            wasFuelCheat = CheatOptions.InfinitePropellant;
             if (useSimpleAcceleration)
             {
                 Logging.Log("Using simple acceleration model");
@@ -150,9 +150,9 @@ namespace BetterBurnTime
         /// </summary>
         private void logFuelCheatActivation()
         {
-            if (CheatOptions.InfiniteFuel != wasFuelCheat)
+            if (CheatOptions.InfinitePropellant != wasFuelCheat)
             {
-                wasFuelCheat = CheatOptions.InfiniteFuel;
+                wasFuelCheat = CheatOptions.InfinitePropellant;
                 if (!useSimpleAcceleration)
                 {
                     if (wasFuelCheat)
@@ -185,7 +185,7 @@ namespace BetterBurnTime
 
             // If infinite fuel is turned on, or if the "use simple acceleration" config
             // option is set, just do a simple dV calculation.
-            if (CheatOptions.InfiniteFuel || useSimpleAcceleration)
+            if (CheatOptions.InfinitePropellant || useSimpleAcceleration)
             {
                 return dVremaining * vessel.TotalMass / totalThrust;
             }
@@ -241,7 +241,7 @@ namespace BetterBurnTime
                 if (engine.thrustPercentage > 0)
                 {
                     double engineKilonewtons = engine.ThrustLimit();
-                    if (!CheatOptions.InfiniteFuel)
+                    if (!CheatOptions.InfinitePropellant)
                     {
                         // Possible future consideraiton:
                         // Get the vacuum Isp from engine.atmosphereCurve.Evaluate(0), rather than ask

@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
+using BurnVector = KSP.UI.Screens.Flight.NavBallBurnVector;
 
 namespace BetterBurnTime
 {
@@ -19,12 +21,12 @@ namespace BetterBurnTime
         private DateTime lastUpdate = DateTime.MinValue;
 
         // things that get set when we're initialized
-        private NavBallBurnVector burnVector = null;
-        private ScreenSafeGUIText originalDurationText = null;
-        private ScreenSafeGUIText originalTimeUntilText = null;
-        private ScreenSafeGUIText alternateDurationText = null;
-        private ScreenSafeGUIText alternateTimeUntilText = null;
-        private ScreenSafeGUIText countdownText = null;
+        private BurnVector burnVector = null;
+        private Text originalDurationText = null;
+        private Text originalTimeUntilText = null;
+        private Text alternateDurationText = null;
+        private Text alternateTimeUntilText = null;
+        private Text countdownText = null;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -164,26 +166,26 @@ namespace BetterBurnTime
             // out that the timing of when this object becomes available isn't super reliable,
             // so various MonoBehaviour implementations in the mod can't just initialize at
             // Start() time and use it.
-            NavBallBurnVector theBurnVector = GameObject.FindObjectOfType<NavBallBurnVector>();
+            BurnVector theBurnVector = GameObject.FindObjectOfType<BurnVector>();
             if (theBurnVector == null) return false; // nope, couldn't get it yet!
 
             // Make sure the burn vector components that we need are there
             if (theBurnVector.ebtText == null) return false;
             if (theBurnVector.TdnText == null) return false;
 
-            ScreenSafeGUIText theClonedDurationText = CloneBehaviour(theBurnVector.ebtText);
+            Text theClonedDurationText = CloneBehaviour(theBurnVector.ebtText);
             if (theClonedDurationText == null) return false;
 
-            ScreenSafeGUIText theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
+            Text theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
             if (theClonedTimeUntilText == null) return false;
 
-            ScreenSafeGUIText theCountdownText = CloneBehaviour(theBurnVector.ebtText);
+            Text theCountdownText = CloneBehaviour(theBurnVector.ebtText);
             if (theCountdownText == null) return false;
             theCountdownText.enabled = false;
             theCountdownText.transform.position = Interpolate(
-                theBurnVector.ebtText.transform.position,
                 theBurnVector.TdnText.transform.position,
-                0.5F);
+                theBurnVector.ebtText.transform.position,
+                2.0F);
 
             // Got everything we need!
             burnVector = theBurnVector;
