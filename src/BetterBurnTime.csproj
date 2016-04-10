@@ -60,6 +60,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="ImpactTracker.cs" />
     <Compile Include="Logging.cs" />
+    <Compile Include="SafeText.cs" />
     <Compile Include="ShipState.cs" />
     <Compile Include="Tally.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

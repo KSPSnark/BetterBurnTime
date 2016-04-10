@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-using BurnVector = KSP.UI.Screens.Flight.NavBallBurnVector;
+using KSP.UI.Screens.Flight;
 
 namespace BetterBurnTime
 {
@@ -21,12 +21,12 @@ namespace BetterBurnTime
         private DateTime lastUpdate = DateTime.MinValue;
 
         // things that get set when we're initialized
-        private BurnVector burnVector = null;
-        private Text originalDurationText = null;
-        private Text originalTimeUntilText = null;
-        private Text alternateDurationText = null;
-        private Text alternateTimeUntilText = null;
-        private Text countdownText = null;
+        private NavBallBurnVector burnVector = null;
+        private SafeText originalDurationText = null;
+        private SafeText originalTimeUntilText = null;
+        private SafeText alternateDurationText = null;
+        private SafeText alternateTimeUntilText = null;
+        private SafeText countdownText = null;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -47,13 +47,13 @@ namespace BetterBurnTime
             {
                 if (instance == null) return;
                 if (!instance.AttemptInitialize()) return;
-                if (instance.originalDurationText.enabled)
+                if (instance.originalDurationText.Enabled)
                 {
-                    instance.originalDurationText.text = value;
+                    instance.originalDurationText.Text = value;
                 }
                 else
                 {
-                    instance.alternateDurationText.text = value;
+                    instance.alternateDurationText.Text = value;
                 }
             }
         }
@@ -67,13 +67,13 @@ namespace BetterBurnTime
             {
                 if (instance == null) return;
                 if (!instance.AttemptInitialize()) return;
-                if (instance.originalTimeUntilText.enabled)
+                if (instance.originalTimeUntilText.Enabled)
                 {
-                    instance.originalTimeUntilText.text = value;
+                    instance.originalTimeUntilText.Text = value;
                 }
                 else
                 {
-                    instance.alternateTimeUntilText.text = value;
+                    instance.alternateTimeUntilText.Text = value;
                 }
             }
         }
@@ -87,8 +87,8 @@ namespace BetterBurnTime
             {
                 if (instance == null) return;
                 if (!instance.AttemptInitialize()) return;
-                instance.countdownText.text = value;
-                instance.countdownText.enabled = value.Length > 0;
+                instance.countdownText.Text = value;
+                instance.countdownText.Enabled = value.Length > 0;
             }
         }
 
@@ -126,7 +126,7 @@ namespace BetterBurnTime
             {
                 if (instance == null) return false;
                 if (!instance.AttemptInitialize()) return false;
-                return instance.originalDurationText.enabled && instance.originalTimeUntilText.enabled;
+                return instance.originalDurationText.Enabled && instance.originalTimeUntilText.Enabled;
             }
         }
 
@@ -139,13 +139,13 @@ namespace BetterBurnTime
             {
                 if (instance == null) return false;
                 if (!instance.AttemptInitialize()) return false;
-                return instance.alternateDurationText.enabled && instance.alternateTimeUntilText.enabled;
+                return instance.alternateDurationText.Enabled && instance.alternateTimeUntilText.Enabled;
             }
             set
             {
                 if (instance == null) return;
                 if (!instance.AttemptInitialize()) return;
-                instance.alternateDurationText.enabled = instance.alternateTimeUntilText.enabled = value;
+                instance.alternateDurationText.Enabled = instance.alternateTimeUntilText.Enabled = value;
             }
         }
 
@@ -166,7 +166,7 @@ namespace BetterBurnTime
             // out that the timing of when this object becomes available isn't super reliable,
             // so various MonoBehaviour implementations in the mod can't just initialize at
             // Start() time and use it.
-            BurnVector theBurnVector = GameObject.FindObjectOfType<BurnVector>();
+            NavBallBurnVector theBurnVector = GameObject.FindObjectOfType<NavBallBurnVector>();
             if (theBurnVector == null) return false; // nope, couldn't get it yet!
 
             // Make sure the burn vector components that we need are there
@@ -189,11 +189,11 @@ namespace BetterBurnTime
 
             // Got everything we need!
             burnVector = theBurnVector;
-            originalDurationText = burnVector.ebtText;
-            originalTimeUntilText = burnVector.TdnText;
-            alternateDurationText = theClonedDurationText;
-            alternateTimeUntilText = theClonedTimeUntilText;
-            countdownText = theCountdownText;
+            originalDurationText = SafeText.of(burnVector.ebtText);
+            originalTimeUntilText = SafeText.of(burnVector.TdnText);
+            alternateDurationText = SafeText.of(theClonedDurationText);
+            alternateTimeUntilText = SafeText.of(theClonedTimeUntilText);
+            countdownText = SafeText.of(theCountdownText);
             isInitialized = true;
 
             return true;
