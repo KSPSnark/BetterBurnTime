@@ -14,7 +14,7 @@ namespace BetterBurnTime
 
         // Threshold levels in seconds for displaying countdown levels
         private static int MAX_LEVELS = 25;
-        private static readonly int[] COUNTDOWN_TIMES = { 0, 1, 2, 3, 5, 10, 15 }; // exponentially doubles after that
+        private static readonly int[] COUNTDOWN_TIMES = Configuration.countdownTimes; // exponentially doubles after that
         private static readonly string[] items;
 
         static Countdown()

@@ -1,0 +1,68 @@
+Version 1.4.2  (CURRENT VERSION)
+* Minor bugfix to prevent occasional NullReferenceException when switching scenes.
+* New feature: countdown times are now configurable.
+
+Version 1.4.1  (2016-04-10)
+* Minor bugfix update. Add handling for occasional NullReferenceException problems that occur with Unity 5.
+
+
+Version 1.4  (2016-03-30)
+* Required update for KSP 1.1. Older versions of BetterBurnTime won't work on 1.1.
+* This and subsequent versions will not run on KSP 1.0.5.
+* Compatibility update only, no new features.
+
+
+----- Everything above this line will run ONLY on KSP 1.1 and newer -----
+
+----- Everything below this line will run ONLY on KSP 1.0.5 and older -----
+
+
+Version 1.3.5  (2016-03-22)
+* Most recent version that works on KSP 1.0.5
+* Fix a bug that causes the impact tracker to spew NullReferenceExceptions for an EVA kerbal.
+
+
+Version 1.3.4  (2016-03-15)
+* Fix a bug in which an exception is displayed upon ship death.
+
+
+Version 1.3.3  (2016-03-13)
+* Update the "impact" display so that it says "touchdown" if your projected surface-collision speed is below the crash tolerance of your lowermost part.
+* Fixed a bug about estimation of impact time, where it wasn't correctly including the height of the vessel.
+
+
+Version 1.3.2  (2016-03-01)
+* Bugfix: don't display "N/A" for kerbals on EVA
+* Bugfix: correctly calculate time for engines with minThrust > 0 when thrust limiter is set (useful for RealFuels)
+* Minor internal performance optimization
+
+
+Version 1.3.1  (2016-02-26)
+* Made time display format customizable
+* Updated the appearance of the countdown indicator (bigger dots)
+* Made the countdown indicator customizable
+* Fixed a minor Isp interoperability bug with Strategia
+
+
+Version 1.3  (2016-02-21)
+* Added "countdown" indicator (little row of green dots showing when to start a burn).
+
+
+Version 1.2  (2016-02-05)
+* Added closest-approach tracker for orbital rendezvous.
+
+
+Version 1.1.2  (2016-01-02)
+* Minor internal refactor to avoid occasional NullReferenceException.
+
+
+Version 1.1.1  (2015-12-16)
+* Fix bug in calculating burn times for multi-nozzle engines.
+
+
+Version 1.1 (2015-12-07)
+* Added time-to-impact indicator for landing on vacuum worlds.
+
+
+Version 1.0  (2015-11-21)
+* Initial release.

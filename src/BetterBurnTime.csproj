@@ -40,7 +40,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -62,6 +61,7 @@
     <Compile Include="Logging.cs" />
     <Compile Include="SafeText.cs" />
     <Compile Include="ShipState.cs" />
+    <Compile Include="SplashScreen.cs" />
     <Compile Include="Tally.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Propulsion.cs" />

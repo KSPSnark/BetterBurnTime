@@ -1,4 +1,6 @@
 ﻿using KSP.IO;
+using System;
+using System.Collections.Generic;
 
 namespace BetterBurnTime
 {
@@ -19,6 +21,7 @@ namespace BetterBurnTime
 
         // Display string for countdown indicator
         public static readonly string countdownText;
+        public static readonly int[] countdownTimes;
 
         // Time formats
         public static readonly string timeFormatSeconds;
@@ -50,6 +53,7 @@ namespace BetterBurnTime
             // N items, separated by whitespace
             // Some options:  ·•▪●■
             countdownText = config.GetValue("CountdownText", "● ● ● • • • • · · · · ·").Trim();
+            countdownTimes = ParseCountdownTimes(config.GetValue("CountdownTimes", "1, 2, 3, 5, 10, 15"));
 
             // For details on how format strings work, see:
             // https://msdn.microsoft.com/en-us/library/0c899ak8.aspx
@@ -61,6 +65,34 @@ namespace BetterBurnTime
             timeFormatWarning             = config.GetValue("FormatWarning",             "(~{0})")      .Trim();
 
             config.save();
+        }
+
+        /// <summary>
+        /// Given a set of times as comma-delimited text, return a sorted array of coundown times to use.
+        /// Will always have at least two elements, and the first element will always be 0.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        private static int[] ParseCountdownTimes(string config)
+        {
+            HashSet<int> timeSet = new HashSet<int>();
+            timeSet.Add(0);
+            string[] tokens = config.Split(',');
+            foreach (string token in tokens)
+            {
+                int time;
+                int.TryParse(token.Trim(), out time);
+                timeSet.Add(time);
+            }
+            if (timeSet.Count < 2) timeSet.Add(1);
+            int[] times = new int[timeSet.Count];
+            int index = 0;
+            foreach (int time in timeSet)
+            {
+                times[index++] = time;
+            }
+            Array.Sort<int>(times);
+            return times;
         }
     }
 }

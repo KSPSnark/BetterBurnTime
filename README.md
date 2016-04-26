@@ -7,6 +7,7 @@ Unzip into your GameData folder, like any mod.
 
 
 ## What this mod does
+
 * It tweaks the "estimated burn time" display on the navball so that it will be reliable and accurate. It takes into account increasing acceleration as fuel mass is burned.
 * When the ship is in vacuum and on a collision course with the ground, it will automatically show time-to-impact, and the estimated burn time to kill your velocity at ground level.
 * When the ship is in orbit and has a close rendezvous with a target ship, it will automatically show time-to-closest-approach, and the estimated burn time to kill your velocity relative to the target.
@@ -25,7 +26,10 @@ Unzip into your GameData folder, like any mod.
 * This is useful when deciding when to do your retro-burn for landing.
 
 **For orbital rendezvous**
+
 * If you can set up a rendezvous that will take you within 10 km of the target, you'll see an estimated time-until-closest-approach (instead of time-until-maneuver), and an estimated burn time to match velocity with the target.
+
+
 
 ## Why it's needed
 The "estimated burn time" indicator provided by stock KSP is very rudimentary. It just keeps track of the maximum acceleration observed for the current ship in the current flight session, and then assumes that. This has several drawbacks:
@@ -34,6 +38,9 @@ The "estimated burn time" indicator provided by stock KSP is very rudimentary. I
 * It doesn't take into account the fact that your acceleration will get better as you burn fuel
 * It doesn't deal with engines running out of fuel, being deactivated, etc.
 * It happily tells you an estimate even if you don't have the fuel to do the burn.
+* You have to do mental math all the time to split the burn across the maneuver node.
+
+This mod addresses all the above problems.
 
 
 ## Things that the mod handles
@@ -51,11 +58,14 @@ The "estimated burn time" indicator provided by stock KSP is very rudimentary. I
 ## The "countdown" indicator
 For maneuver nodes and closest-approach, the mod displays a "countdown" indicator. This is a little row of green dots, immediately below the estimated burn time. This row of dots counts down until it's time to start your burn: when the last dot disappears, start the burn.
 
-The display is logarithmic.  The last three (leftmost) dots signify 3, 2, 1 seconds.  Additional dots are 5 seconds, 10 seconds, 15 seconds, then it doubles for each additional dot.
+![countdown](http://i.imgur.com/drUkSRR.png)
+
+The display is logarithmic.  The last three (biggest, leftmost) dots are in seconds:  3, 2, 1, go.  After the first three dots, it's 5 seconds, 10 seconds, 15 seconds, then it doubles for each dot after that.
+
 
 **Note:** No countdown indicator is currently shown for the "time to impact" indicator; this is because "when should I start?" is more complex, depending on a lot of factors including your descent angle, TWR, etc.  This feature may eventually be added, but until then, you're on your own.
 
-If you don't like this indicator, you can customize its appearance, or turn it off entirely (see "How to configure", below).
+If you don't like this indicator, you can customize its appearance, or turn it off completely (see "How to configure", below).
 
 
 ## The "insufficient fuel" warning
@@ -71,8 +81,11 @@ If the mod decides that you don't have enough dV to do the specified maneuver, i
 Note that it won't do this if you have the "infinite fuel" cheat turned on (since then you always have enough dV!)
 
 
+
 ## The time-to-impact indicator
 Under the right circumstances, the mod will display a "time until impact" indicator (instead of "time until maneuver"), along with an estimated burn time which is how long your engine would need to kill your velocity at ground level.
+
+![Impact tracker](http://i.imgur.com/OE84WPz.png)
 
 All of the following conditions must be met for this indicator to be displayed:
 
@@ -85,10 +98,14 @@ All of the following conditions must be met for this indicator to be displayed:
 
 Note that the time-to-impact is based on the assumption that you don't do a retro-burn and just coast to your doom.  So if you're figuring out "when do I start my retro-burn to land," you'll generally want to wait a little bit after the point at which time-to-impact equals estimated burn time.
 
+
 ## The time-to-closest-approach indicator
 Under the right circumstances, the mod will display a "time until closest approach" indicator (instead of "time until maneuver"), along with an estimated burn time to match velocity with the target.
 
+![Closest approach tracker](http://i.imgur.com/v5BQhob.png)
+
 All of the following conditions must be met for this indicator to be displayed:
+
 * The approach tracker isn't disabled via settings (see "Settings", below)
 * You don't have a maneuver node set
 * The impact tracker (see above) isn't displaying time-to-impact
@@ -152,5 +169,10 @@ The following settings are supported:
 * **MaxTimeUntilEncounter:** This is the maximum time, in seconds, that the closest-approach tracker will predict a closest approach. By default, it's 900 (fifteen minutes).
 * **MaxClosestApproachDistanceKm:** This is the maximum distance, in kilometers, that a closest approach can be for the closest-approach tracker to show a prediction. By default, it's 10 km.
 * **MinTargetDistanceMeters:** The target must be at least this many meters away from your ship for the closest-approach tracker to show a prediction. By default, it's 200 meters.
-* **FormatSeconds, etc.:** Various entries named "Format" are used for formatting the time display. You can edit these to change the way time is displayed. See the .NET numeric formatting rules for details: https://msdn.microsoft.com/en-us/library/0c899ak8.aspx
+* **FormatSeconds, etc.:** Various entries named "Format" are used for formatting the time display. You can edit these to change the way time is displayed. See the [.NET numeric formatting rules](https://msdn.microsoft.com/en-us/library/0c899ak8.aspx) for details.
 * **CountdownText:** This string is used for displaying the "countdown" indicator. You can customize this to suit yourself, just be sure to separate the "pips" with whitespace. To turn off the countdown indicator completely, set this to an empty string.
+* **CountdownTimes:** This string is a comma-delimited list of threshold times (in seconds) for displaying the number of pips in the countdown indicator.
+
+-------
+#### Acknowledgments
+Thanks to [FullMetalMachinist](http://forum.kerbalspaceprogram.com/index.php?/profile/156531-fullmetalmachinist/) in the KSP forums for the [excellent suggestion](http://forum.kerbalspaceprogram.com/index.php?/topic/126111-105-betterburntime-v12-accurate-burn-time-indicator-on-navball-no-more-na/&page=4#comment-2422659) of using a row of dots to show the countdown-to-start-burn!  Ask and ye shall receive.  Thanks also to [Gen. Jack D. Ripper](http://forum.kerbalspaceprogram.com/index.php?/profile/144882-gen-jack-d-ripper/) for [usability suggestions](http://forum.kerbalspaceprogram.com/index.php?/topic/126111-105-betterburntime-v13-accurate-burn-time-indicator-on-navball-no-more-na/&do=findComment&comment=2425421) that led me to the updated countdown design.
