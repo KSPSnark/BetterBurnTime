@@ -46,6 +46,7 @@ namespace BetterBurnTime
         /// <returns></returns>
         public static string ForSeconds(int seconds)
         {
+            if (Configuration.isNumericCountdown) return NumericCountdown(seconds);
             int time;
             for (int level = 0; level < COUNTDOWN_TIMES.Length; ++level)
             {
@@ -72,6 +73,13 @@ namespace BetterBurnTime
             if (items.Length == 0) return string.Empty;
             if (index >= items.Length) return items[items.Length - 1];
             return items[index - 1];
+        }
+
+        private static string NumericCountdown(int seconds)
+        {
+            return (seconds > 0)
+                ? string.Format(Configuration.countdownText, TimeFormatter.Default.format(seconds))
+                : string.Empty;
         }
     }
 }

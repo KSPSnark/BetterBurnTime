@@ -26,6 +26,7 @@ namespace BetterBurnTime
         private ShipState vessel;
         private string lastUpdateText;
         private int lastBurnTime;
+        private int lastTimeUntilBurnStart;
         private Tally propellantsConsumed;
 
         public void Start()
@@ -52,6 +53,7 @@ namespace BetterBurnTime
             vessel = new ShipState();
             lastUpdateText = null;
             lastBurnTime = int.MinValue;
+            lastTimeUntilBurnStart = int.MinValue;
         }
 
         public void LateUpdate()
@@ -123,7 +125,12 @@ namespace BetterBurnTime
                         }
                     }
                     BurnInfo.Duration = lastUpdateText;
-                    BurnInfo.Countdown = Countdown.ForSeconds(timeUntil - burnSeconds / 2);
+                    int timeUntilBurnStart = timeUntil - burnSeconds / 2;
+                    if (timeUntilBurnStart != lastTimeUntilBurnStart)
+                    {
+                        lastTimeUntilBurnStart = timeUntilBurnStart;
+                        BurnInfo.Countdown = Countdown.ForSeconds(timeUntilBurnStart);
+                    }
                 }
 
                 if (customDescription == null)

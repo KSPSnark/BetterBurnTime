@@ -12,7 +12,7 @@ namespace BetterBurnTime
     /// </summary>
     class SafeText
     {
-        private readonly Text text;
+        private Text text;
 
         private SafeText(Text text)
         {
@@ -29,6 +29,15 @@ namespace BetterBurnTime
             // use ReferenceEquals here because Unity does weird overloading of operator ==
             if (Object.ReferenceEquals(text, null)) throw new ArgumentNullException("text cannot be null");
             return new SafeText(text);
+        }
+
+        public void Destroy()
+        {
+            if (text != null)
+            {
+                UnityEngine.Object.Destroy(text);
+                text = null;
+            }
         }
 
         /// <summary>

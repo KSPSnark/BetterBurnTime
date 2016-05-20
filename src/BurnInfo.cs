@@ -38,6 +38,27 @@ namespace BetterBurnTime
             AttemptInitialize();
         }
 
+        public void OnDestroy()
+        {
+            if (alternateDurationText != null)
+            {
+                alternateDurationText.Destroy();
+                alternateDurationText = null;
+            }
+
+            if (alternateTimeUntilText != null)
+            {
+                alternateTimeUntilText.Destroy();
+                alternateTimeUntilText = null;
+            }
+
+            if (countdownText != null)
+            {
+                countdownText.Destroy();
+                countdownText = null;
+            }
+        }
+
         /// <summary>
         /// Sets the text displayed for burn duration.
         /// </summary>
@@ -79,7 +100,7 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets or sets the countdown level of the indicator (the number of dots displayed).
+        /// Sets the displayed countdown text the indicator.
         /// </summary>
         public static string Countdown
         {
@@ -177,10 +198,19 @@ namespace BetterBurnTime
             if (theClonedDurationText == null) return false;
 
             Text theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
-            if (theClonedTimeUntilText == null) return false;
+            if (theClonedTimeUntilText == null)
+            {
+                Destroy(theClonedDurationText);
+                return false;
+            }
 
             Text theCountdownText = CloneBehaviour(theBurnVector.ebtText);
-            if (theCountdownText == null) return false;
+            if (theCountdownText == null)
+            {
+                Destroy(theClonedDurationText);
+                Destroy(theClonedTimeUntilText);
+                return false;
+            }
             theCountdownText.enabled = false;
             theCountdownText.transform.position = Interpolate(
                 theBurnVector.TdnText.transform.position,

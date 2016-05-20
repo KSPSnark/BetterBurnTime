@@ -21,6 +21,7 @@ namespace BetterBurnTime
 
         // Display string for countdown indicator
         public static readonly string countdownText;
+        public static readonly bool isNumericCountdown;
         public static readonly int[] countdownTimes;
 
         // Time formats
@@ -50,10 +51,12 @@ namespace BetterBurnTime
             closestApproachMinTargetDistance     = config.GetValue("MinTargetDistanceMeters",      200.0);
 
 
-            // N items, separated by whitespace
+            // N items, separated by whitespace. Note that if countdown text contains "{0}", it's
+            // interpreted as a format string for displaying a numeric time.
             // Some options:  ·•▪●■
             countdownText = config.GetValue("CountdownText", "● ● ● • • • • · · · · ·").Trim();
             countdownTimes = ParseCountdownTimes(config.GetValue("CountdownTimes", "1, 2, 3, 5, 10, 15"));
+            isNumericCountdown = countdownText.Contains("{0}");
 
             // For details on how format strings work, see:
             // https://msdn.microsoft.com/en-us/library/0c899ak8.aspx

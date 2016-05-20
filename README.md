@@ -42,6 +42,8 @@ The "estimated burn time" indicator provided by stock KSP is very rudimentary. I
 
 This mod addresses all the above problems.
 
+![maneuver](https://raw.githubusercontent.com/KSPSnark/BetterBurnTime/master/screenshots/maneuver.png)
+
 
 ## Things that the mod handles
 
@@ -58,14 +60,14 @@ This mod addresses all the above problems.
 ## The "countdown" indicator
 For maneuver nodes and closest-approach, the mod displays a "countdown" indicator. This is a little row of green dots, immediately below the estimated burn time. This row of dots counts down until it's time to start your burn: when the last dot disappears, start the burn.
 
-![countdown](http://i.imgur.com/drUkSRR.png)
+![countdown](https://raw.githubusercontent.com/KSPSnark/BetterBurnTime/master/screenshots/countdown.png)
 
 The display is logarithmic.  The last three (biggest, leftmost) dots are in seconds:  3, 2, 1, go.  After the first three dots, it's 5 seconds, 10 seconds, 15 seconds, then it doubles for each dot after that.
 
 
 **Note:** No countdown indicator is currently shown for the "time to impact" indicator; this is because "when should I start?" is more complex, depending on a lot of factors including your descent angle, TWR, etc.  This feature may eventually be added, but until then, you're on your own.
 
-If you don't like this indicator, you can customize its appearance, or turn it off completely (see "How to configure", below).
+If you don't like this indicator, you can customize its appearance, make it numeric rather than graphic, or turn it off completely (see "How to configure", below).
 
 
 ## The "insufficient fuel" warning
@@ -85,7 +87,7 @@ Note that it won't do this if you have the "infinite fuel" cheat turned on (sinc
 ## The time-to-impact indicator
 Under the right circumstances, the mod will display a "time until impact" indicator (instead of "time until maneuver"), along with an estimated burn time which is how long your engine would need to kill your velocity at ground level.
 
-![Impact tracker](http://i.imgur.com/OE84WPz.png)
+![Impact tracker](https://raw.githubusercontent.com/KSPSnark/BetterBurnTime/master/screenshots/impact.png)
 
 All of the following conditions must be met for this indicator to be displayed:
 
@@ -102,7 +104,7 @@ Note that the time-to-impact is based on the assumption that you don't do a retr
 ## The time-to-closest-approach indicator
 Under the right circumstances, the mod will display a "time until closest approach" indicator (instead of "time until maneuver"), along with an estimated burn time to match velocity with the target.
 
-![Closest approach tracker](http://i.imgur.com/v5BQhob.png)
+![Closest approach tracker](https://raw.githubusercontent.com/KSPSnark/BetterBurnTime/master/screenshots/approach.png)
 
 All of the following conditions must be met for this indicator to be displayed:
 
@@ -170,8 +172,10 @@ The following settings are supported:
 * **MaxClosestApproachDistanceKm:** This is the maximum distance, in kilometers, that a closest approach can be for the closest-approach tracker to show a prediction. By default, it's 10 km.
 * **MinTargetDistanceMeters:** The target must be at least this many meters away from your ship for the closest-approach tracker to show a prediction. By default, it's 200 meters.
 * **FormatSeconds, etc.:** Various entries named "Format" are used for formatting the time display. You can edit these to change the way time is displayed. See the [.NET numeric formatting rules](https://msdn.microsoft.com/en-us/library/0c899ak8.aspx) for details.
-* **CountdownText:** This string is used for displaying the "countdown" indicator. You can customize this to suit yourself, just be sure to separate the "pips" with whitespace. To turn off the countdown indicator completely, set this to an empty string.
-* **CountdownTimes:** This string is a comma-delimited list of threshold times (in seconds) for displaying the number of pips in the countdown indicator.
+* **CountdownText:** This string is used for displaying the "countdown" indicator. You can customize this to suit yourself, just be sure to separate the "pips" with whitespace.
+    * To make it display a numeric value rather than a graphic string of "pips", just include "{0}" in the string. For example: "Start burn in {0}"
+    * To turn off the countdown indicator completely, set this to an empty string.
+* **CountdownTimes:** This string is a comma-delimited list of threshold times (in seconds) for displaying the number of pips in the countdown indicator. (Ignored if you're using a numeric countdown.)
 
 -------
 #### Acknowledgments
