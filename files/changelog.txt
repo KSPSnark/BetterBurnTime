@@ -1,4 +1,8 @@
-Version 1.4.3  (CURRENT VERSION)
+Version 1.4.4  (CURRENT VERSION)
+* Update for compatibility with KSP 1.1.3.
+
+
+Version 1.4.3  (2016-05-19)
 * Added an option to the config file to allow for numeric countdown-to-burn indicator, instead of graphic.
 * Fixed a small memory leak.
 

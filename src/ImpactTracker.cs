@@ -289,7 +289,7 @@ namespace BetterBurnTime
             // We now know how far we have to fall.  What's our downward acceleration? (might be negative)
             // Note that we deliberately exclude the ship's own propulsion. Including that causes a confusing
             // UI experience.
-            double downwardAcceleration = vessel.gForce.magnitude - centripetalAcceleration;
+            double downwardAcceleration = vessel.graviticAcceleration.magnitude - centripetalAcceleration;
             // TODO: If we eventually allow impact-tracking while in atmosphere, we need to do something more
             // complex to allow for atmospheric forces.
 
