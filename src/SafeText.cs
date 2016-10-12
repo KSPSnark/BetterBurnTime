@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine.UI;
+using TMPro;
 
 namespace BetterBurnTime
 {
@@ -12,9 +13,9 @@ namespace BetterBurnTime
     /// </summary>
     class SafeText
     {
-        private Text text;
+        private TextMeshProUGUI text;
 
-        private SafeText(Text text)
+        private SafeText(TextMeshProUGUI text)
         {
             this.text = text;
         }
@@ -24,7 +25,7 @@ namespace BetterBurnTime
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static SafeText of(Text text)
+        public static SafeText of(TextMeshProUGUI text)
         {
             // use ReferenceEquals here because Unity does weird overloading of operator ==
             if (Object.ReferenceEquals(text, null)) throw new ArgumentNullException("text cannot be null");

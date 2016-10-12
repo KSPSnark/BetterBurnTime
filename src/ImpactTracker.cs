@@ -17,9 +17,9 @@ namespace BetterBurnTime
 
         private static ImpactTracker instance = null;
 
-        // The last time we updated our calculations. Used with UPDATE_INTERVAL
+        // The next time we're due to update our calculations. Used with UPDATE_INTERVAL
         // to prevent spamming excessive calculations.
-        private DateTime lastVesselHeightUpdate;
+        private DateTime nextVesselHeightUpdate;
 
         // Results of calculations
         private double lastVesselHeight;
@@ -47,7 +47,7 @@ namespace BetterBurnTime
             try
             {
                 instance = this;
-                lastVesselHeightUpdate = DateTime.Now;
+                nextVesselHeightUpdate = DateTime.Now;
                 Reset();
             }
             catch (Exception e)
@@ -154,9 +154,9 @@ namespace BetterBurnTime
         private double GetVesselHeight(out Part currentLowestPart)
         {
             DateTime now = DateTime.Now;
-            if (double.IsNaN(lastVesselHeight) || (now - lastVesselHeightUpdate > UPDATE_INTERVAL))
+            if (double.IsNaN(lastVesselHeight) || (now > nextVesselHeightUpdate))
             {
-                lastVesselHeightUpdate = now;
+                nextVesselHeightUpdate = now + UPDATE_INTERVAL;
                 lastVesselHeight = CalculateVesselHeight(FlightGlobals.ActiveVessel, out lowestPart);
             }
             currentLowestPart = lowestPart;
@@ -208,7 +208,6 @@ namespace BetterBurnTime
             }
             if (lowestPart == null) return 0.0; // no usable parts
             double vesselPosition = Vector3.Distance(
-                //vessel.GetReferenceTransformPart().transform.position,
                 vessel.transform.position,
                 vessel.mainBody.position);
             return vesselPosition - minPartPosition;
@@ -230,7 +229,7 @@ namespace BetterBurnTime
             for (int partIndex = 0; partIndex < vessel.parts.Count; ++partIndex)
             {
                 Part part = vessel.parts[partIndex];
-                if (part.collider.enabled) partAltitudes.Add(
+                if ((part.collider != null) && part.collider.enabled) partAltitudes.Add(
                     new PartAltitude() { p = part, alt = Vector3.Distance(part.transform.position, vessel.mainBody.position) });
             }
             partAltitudes.Sort((p1, p2) => p1.alt.CompareTo(p2.alt));

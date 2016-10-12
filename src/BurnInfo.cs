@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 using KSP.UI.Screens.Flight;
+using TMPro;
 
 namespace BetterBurnTime
 {
@@ -194,17 +194,17 @@ namespace BetterBurnTime
             if (theBurnVector.ebtText == null) return false;
             if (theBurnVector.TdnText == null) return false;
 
-            Text theClonedDurationText = CloneBehaviour(theBurnVector.ebtText);
+            TextMeshProUGUI theClonedDurationText = CloneBehaviour(theBurnVector.ebtText);
             if (theClonedDurationText == null) return false;
 
-            Text theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
+            TextMeshProUGUI theClonedTimeUntilText = CloneBehaviour(theBurnVector.TdnText);
             if (theClonedTimeUntilText == null)
             {
                 Destroy(theClonedDurationText);
                 return false;
             }
 
-            Text theCountdownText = CloneBehaviour(theBurnVector.ebtText);
+            TextMeshProUGUI theCountdownText = CloneBehaviour(theBurnVector.ebtText);
             if (theCountdownText == null)
             {
                 Destroy(theClonedDurationText);
