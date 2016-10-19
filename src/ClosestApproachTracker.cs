@@ -20,7 +20,8 @@ namespace BetterBurnTime
         private double closestApproachRelativeVelocity;
 
         // "Presentation" data (based on calculations) used for display purposes.
-        private int secondsUntilClosestApproach;
+        private double floatSecondsUntilClosestApproach;
+        private int intSecondsUntilClosestApproach;
         private int hundredsMetersDistance;
         private string approachDescription;
 
@@ -75,17 +76,18 @@ namespace BetterBurnTime
                 }
                 if (Recalculate())
                 {
-                    int timeUntil = (int)(closestApproachTime - Now);
+                    floatSecondsUntilClosestApproach = closestApproachTime - Now;
+                    int timeUntil = (int)floatSecondsUntilClosestApproach;
                     int distance100 = (int)((closestApproachDistance * 0.01) + 0.5);
-                    bool isChanged = (timeUntil != secondsUntilClosestApproach) || (distance100 != hundredsMetersDistance);
+                    bool isChanged = (timeUntil != intSecondsUntilClosestApproach) || (distance100 != hundredsMetersDistance);
                     if (isChanged)
                     {
-                        secondsUntilClosestApproach = timeUntil;
+                        intSecondsUntilClosestApproach = timeUntil;
                         hundredsMetersDistance = distance100;
                         approachDescription = string.Format(
                             "Target@{0:F1}km in {1}",
                             0.1 * (double)hundredsMetersDistance,
-                            TimeFormatter.Default.format(secondsUntilClosestApproach));
+                            TimeFormatter.Default.format(intSecondsUntilClosestApproach));
                     }
                 } else
                 {
@@ -130,11 +132,11 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets the time until closest approach, in seconds.  -1 if not available.
+        /// Gets the time until closest approach, in seconds.  NaN if not available.
         /// </summary>
-        public static int TimeUntil
+        public static double TimeUntil
         {
-            get { return (instance == null) ? -1 : instance.secondsUntilClosestApproach; }
+            get { return (instance == null) ? double.NaN : instance.floatSecondsUntilClosestApproach; }
         }
 
         /// <summary>
@@ -145,7 +147,8 @@ namespace BetterBurnTime
             closestApproachTime = double.NaN;
             closestApproachDistance = double.NaN;
             closestApproachRelativeVelocity = double.NaN;
-            secondsUntilClosestApproach = -1;
+            floatSecondsUntilClosestApproach = double.NaN;
+            intSecondsUntilClosestApproach = -1;
             hundredsMetersDistance = -1;
             approachDescription = null;
         }

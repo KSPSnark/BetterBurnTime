@@ -61,11 +61,15 @@ namespace BetterBurnTime
             logFuelCheatActivation();
             try
             {
+                BetterBurnTimeData api = BetterBurnTimeData.Current;
+                if (api != null) api.Reset();
                 if (!BurnInfo.IsInitialized) return; // can't do anything
 
+                BetterBurnTimeData.BurnType burnType = BetterBurnTimeData.BurnType.None;
                 string customDescription = null;
                 double dVrequired = ImpactTracker.ImpactSpeed;
-                int timeUntil = -1;
+                double timeUntil = double.NaN;
+                bool shouldDisplayCountdown = false;
                 if (double.IsNaN(dVrequired))
                 {
                     // No impact info is available. Do we have closest-approach info?
@@ -75,28 +79,38 @@ namespace BetterBurnTime
                         // No closest-approach info available either, use the maneuver dV remaining.
                         dVrequired = BurnInfo.DvRemaining;
                         timeUntil = SecondsUntilNode();
+                        shouldDisplayCountdown = true;
+                        burnType = BetterBurnTimeData.BurnType.Maneuver;
                     }
                     else
                     {
                         // We have closest-approach info, use the description from that.
                         customDescription = ClosestApproachTracker.Description;
                         timeUntil = ClosestApproachTracker.TimeUntil;
+                        shouldDisplayCountdown = true;
+                        burnType = BetterBurnTimeData.BurnType.Rendezvous;
                     }
                 }
                 else
                 {
                     // We have impact info, use the description from that.
                     customDescription = ImpactTracker.Description;
+                    timeUntil = ImpactTracker.TimeUntil;
                     // TODO: enable countdown to retro-burn, not doing it now 'coz it needs more math & logic
-                    // timeUntil = ImpactTracker.TimeUntil;
+                    // shouldDisplayCountdown = true
+                    burnType = BetterBurnTimeData.BurnType.Impact;
                 }
 
                 // At this point, either we have a dVrequired or not. If we have one, we might
                 // have a description (meaning it's one of our custom trackers from this mod)
                 // or we might not (meaning "leave it alone at let the stock game decide what to say").
 
-                if (double.IsNaN(dVrequired)) return;
-                if (FlightGlobals.ActiveVessel == null) return;
+                if (double.IsNaN(dVrequired) || (FlightGlobals.ActiveVessel == null))
+                {
+                    BurnInfo.Countdown = string.Empty;
+                    if (customDescription == null) BurnInfo.AlternateDisplayEnabled = false;
+                    return;
+                }
 
                 if (FlightGlobals.ActiveVessel.IsEvaKerbal())
                 {
@@ -125,11 +139,20 @@ namespace BetterBurnTime
                         }
                     }
                     BurnInfo.Duration = lastUpdateText;
-                    int timeUntilBurnStart = timeUntil - burnSeconds / 2;
+                    int intTimeUntil = (double.IsNaN(timeUntil) || !shouldDisplayCountdown) ? -1 : (int)timeUntil;
+                    int timeUntilBurnStart = intTimeUntil - burnSeconds / 2;
                     if (timeUntilBurnStart != lastTimeUntilBurnStart)
                     {
                         lastTimeUntilBurnStart = timeUntilBurnStart;
                         BurnInfo.Countdown = Countdown.ForSeconds(timeUntilBurnStart);
+                    }
+                    if (api != null)
+                    {
+                        api.burnType = burnType;
+                        api.burnTime = floatBurnSeconds;
+                        api.dV = dVrequired;
+                        api.timeUntil = timeUntil;
+                        api.isInsufficientFuel = isInsufficientFuel;
                     }
                 }
 
@@ -337,21 +360,21 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets the time until the next maneuver node, in seconds. -1 if none.
+        /// Gets the time until the next maneuver node, in seconds. NaN if none.
         /// </summary>
         /// <returns></returns>
-        private static int SecondsUntilNode()
+        private static double SecondsUntilNode()
         {
             Vessel vessel = FlightGlobals.ActiveVessel;
-            if (vessel == null) return -1;
+            if (vessel == null) return double.NaN;
             PatchedConicSolver solver = vessel.patchedConicSolver;
-            if (solver == null) return -1;
-            if ((solver.maneuverNodes == null) || (solver.maneuverNodes.Count == 0)) return -1;
+            if (solver == null) return double.NaN;
+            if ((solver.maneuverNodes == null) || (solver.maneuverNodes.Count == 0)) return double.NaN;
             ManeuverNode node = solver.maneuverNodes[0];
-            if (node == null) return -1;
+            if (node == null) return double.NaN;
             double timeUntil = node.UT - Planetarium.GetUniversalTime();
-            if (timeUntil < 0) return -1;
-            return (int)timeUntil;
+            if (timeUntil < 0) return double.NaN;
+            return timeUntil;
         }
     }
 }

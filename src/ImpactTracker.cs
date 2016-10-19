@@ -13,7 +13,7 @@ namespace BetterBurnTime
         /// </summary>
         private static readonly double MIN_FALL_SPEED = 2.0;
 
-        private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 250);
+        private static readonly TimeSpan UPDATE_INTERVAL = TimeSpan.FromMilliseconds(250);
 
         private static ImpactTracker instance = null;
 
@@ -23,7 +23,7 @@ namespace BetterBurnTime
 
         // Results of calculations
         private double lastVesselHeight;
-        private int secondsUntilImpact = -1;
+        private double secondsUntilImpact = double.NaN;
         private string impactVerb;
         private Part lowestPart;
         private double impactSpeed;
@@ -99,11 +99,11 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets the time until impact, in seconds.  -1 if not available.
+        /// Gets the time until impact, in seconds.  NaN if not available.
         /// </summary>
-        public static int TimeUntil
+        public static double TimeUntil
         {
-            get { return (instance == null) ? -1 : instance.secondsUntilImpact;  }
+            get { return (instance == null) ? double.NaN : instance.secondsUntilImpact;  }
         }
 
         /// <summary>
@@ -137,11 +137,11 @@ namespace BetterBurnTime
                 // We could use that to compensate for sloping ground, so that if we're traveling
                 // sideways and the ground is rising or falling beneath us, compensate for the
                 // estimated time of impact.
-                int remainingSeconds = (int)calculatedTimeToImpact;
-                if (remainingSeconds != secondsUntilImpact)
+                int remainingSeconds = AsInteger(calculatedTimeToImpact);
+                if (remainingSeconds != AsInteger(secondsUntilImpact))
                 {
-                    secondsUntilImpact = remainingSeconds;
-                    impactDescription = string.Format("{0} in {1}", impactVerb, TimeFormatter.Default.format(secondsUntilImpact));
+                    secondsUntilImpact = calculatedTimeToImpact;
+                    impactDescription = string.Format("{0} in {1}", impactVerb, TimeFormatter.Default.format(AsInteger(secondsUntilImpact)));
                 }
             }
             else
@@ -149,6 +149,11 @@ namespace BetterBurnTime
                 Reset();
             }
             return shouldDisplay;
+        }
+
+        private static int AsInteger(double value)
+        {
+            return (double.IsNaN(value) || double.IsInfinity(value)) ? -1 : (int)value;
         }
 
         private double GetVesselHeight(out Part currentLowestPart)
@@ -196,7 +201,7 @@ namespace BetterBurnTime
             for (int partIndex = 0; partIndex < parts.Count; ++partIndex)
             {
                 Part part = parts[partIndex];
-                if (!part.collider.enabled) continue;
+                if ((part.collider == null) || !part.collider.enabled) continue;
                 double partPosition = Vector3.Distance(
                     part.collider.ClosestPointOnBounds(vessel.mainBody.position),
                     vessel.mainBody.position);
@@ -319,7 +324,7 @@ namespace BetterBurnTime
             impactVerb = "N/A";
             lowestPart = null;
             impactSpeed = double.NaN;
-            secondsUntilImpact = -1;
+            secondsUntilImpact = double.NaN;
             impactDescription = null;
         }
 

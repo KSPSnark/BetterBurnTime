@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BetterBurnTime.cs" />
+    <Compile Include="BetterBurnTimeData.cs" />
     <Compile Include="BurnInfo.cs" />
     <Compile Include="ClosestApproachTracker.cs" />
     <Compile Include="Configuration.cs" />

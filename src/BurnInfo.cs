@@ -28,18 +28,28 @@ namespace BetterBurnTime
         private SafeText alternateTimeUntilText = null;
         private SafeText countdownText = null;
 
+        // keep track of maneuver nodes
+        private PatchedConicSolver solver = null;
+
+        private void Awake()
+        {
+            GameEvents.onVesselChange.Add(new EventData<Vessel>.OnEvent(OnVesselChange));
+        }
+
         /// <summary>
         /// Here when the add-on loads upon flight start.
         /// </summary>
-        public void Start()
+        private void Start()
         {
             instance = this;
             isInitialized = false;
             AttemptInitialize();
         }
 
-        public void OnDestroy()
+        private void OnDestroy()
         {
+            GameEvents.onVesselChange.Remove(new EventData<Vessel>.OnEvent(OnVesselChange));
+
             if (alternateDurationText != null)
             {
                 alternateDurationText.Destroy();
@@ -133,7 +143,9 @@ namespace BetterBurnTime
             {
                 if (instance == null) return double.NaN;
                 if (!instance.AttemptInitialize()) return double.NaN;
-                return instance.burnVector.dVremaining;
+                if ((instance.solver == null) || (instance.solver.maneuverNodes.Count == 0)) return double.NaN;
+                ManeuverNode node = instance.solver.maneuverNodes[0];
+                return node.GetBurnVector(node.patch).magnitude;
             }
         }
 
@@ -168,6 +180,12 @@ namespace BetterBurnTime
                 if (!instance.AttemptInitialize()) return;
                 instance.alternateDurationText.Enabled = instance.alternateTimeUntilText.Enabled = value;
             }
+        }
+
+        private void OnVesselChange(Vessel vessel)
+        {
+            Logging.Log("Vessel changed to " + vessel.vesselName);
+            solver = vessel.patchedConicSolver;
         }
 
         /// <summary>

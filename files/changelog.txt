@@ -1,4 +1,10 @@
-Version 1.5  (CURRENT VERSION)
+Version 1.5.1  (CURRENT VERSION)
+* Fixed a bug that caused BBT to spam NullReferenceException when impact-tracking a vessel that has a kerbal in a command chair.
+* Added BetterBurnTimeData as a public API for the mod.
+* Added sample code in new "example" github directory, illustrating how to use it.
+
+
+Version 1.5  (2016-10-11)
 * Update for compatibility with KSP 1.2.
 * Changed to CC-BY-NC-ND license (was previously MIT).
 
