@@ -145,6 +145,7 @@ namespace BetterBurnTime
                 if (!instance.AttemptInitialize()) return double.NaN;
                 if ((instance.solver == null) || (instance.solver.maneuverNodes.Count == 0)) return double.NaN;
                 ManeuverNode node = instance.solver.maneuverNodes[0];
+                if ((node == null) || (node.patch == null)) return double.NaN;
                 return node.GetBurnVector(node.patch).magnitude;
             }
         }
@@ -259,7 +260,7 @@ namespace BetterBurnTime
                 source.gameObject,
                 source.transform.position,
                 source.transform.rotation) as GameObject;
-            clonedObject.transform.parent = source.gameObject.transform.parent;
+            clonedObject.transform.SetParent(source.gameObject.transform.parent, false);
             T clonedBehaviour = clonedObject.GetComponent<T>();
 
             clonedBehaviour.enabled = false;

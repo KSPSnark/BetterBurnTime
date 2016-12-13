@@ -21,6 +21,7 @@ namespace BetterBurnTime
         /// </summary>
         private static readonly string[] THANK_USERS =
         {
+            "DMagic",               // bug report (with solution!)
             "FullMetalMachinist",   // for the countdown idea
             "Gen. Jack D. Ripper",  // suggestions around the countdown
             "NathanKell",           // just 'coz he's awesome :-)

@@ -1,4 +1,9 @@
-Version 1.5.1  (CURRENT VERSION)
+Version 1.5.2  (CURRENT VERSION)
+* Fix a bug that spams an error message "Parent of RectTransform is being set with parent property." when the mod starts up. (Thanks to DMagic for catching!)
+* Fix NRE that happens sometimes when switching to a vessel that already has a maneuver node set.
+
+
+Version 1.5.1  (2016-10-18)
 * Fixed a bug that caused BBT to spam NullReferenceException when impact-tracking a vessel that has a kerbal in a command chair.
 * Added BetterBurnTimeData as a public API for the mod.
 * Added sample code in new "example" github directory, illustrating how to use it.
