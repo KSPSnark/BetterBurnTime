@@ -1,4 +1,10 @@
-Version 1.5.2  (CURRENT VERSION)
+Version 1.5.3  (CURRENT VERSION)
+* Undo the "fix" for the "Parent of RectTransform" error in 1.5.2, since it hopelessly broke the navball. Sorry, everyone.
+* Fix NRE that happens sometimes when switching to a vessel that already has a maneuver node set.
+
+
+Version 1.5.2  (2016-12-12)
+* BROKEN VERSION, DO NOT USE.  Navball is hopelessly mangled whenever impact tracker or closest-approach tracker is active.
 * Fix a bug that spams an error message "Parent of RectTransform is being set with parent property." when the mod starts up. (Thanks to DMagic for catching!)
 * Fix NRE that happens sometimes when switching to a vessel that already has a maneuver node set.
 

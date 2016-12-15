@@ -260,7 +260,25 @@ namespace BetterBurnTime
                 source.gameObject,
                 source.transform.position,
                 source.transform.rotation) as GameObject;
-            clonedObject.transform.SetParent(source.gameObject.transform.parent, false);
+
+            // This line will cause Unity to log an error once, each time BetterBurnTime
+            // starts up. The error yells about how this is an invalid thing to do, and
+            // that one should call SetParent on the transform instead of setting its
+            // parent property to explicitly equal the other transform.  Like this:
+            // clonedObject.transform.SetParent(source.gameObject.transform.parent, false);
+            //
+            // However, I'm not doing it that way, on purpose.
+            //
+            // Rationale: Following the error message's advice causes the error to go
+            // away... but breaks the navball completely whenever the impact tracker
+            // or closest-approach tracker is active. Bizarre stuff starts happening--
+            // the navball sphere being drawn over top of the velocity display, text
+            // markers not showing, weird occlusion problems for navball markers.
+            //
+            // So, the error message will just have to stay, unless someone knows a way
+            // to get rid of it without hopelessly breaking the navball.
+            clonedObject.transform.parent = source.gameObject.transform.parent;
+
             T clonedBehaviour = clonedObject.GetComponent<T>();
 
             clonedBehaviour.enabled = false;
