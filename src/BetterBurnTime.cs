@@ -26,6 +26,7 @@ namespace BetterBurnTime
         private ShipState vessel;
         private string lastUpdateText;
         private int lastBurnTime;
+        private bool wasInsufficientFuel = false;
         private int lastTimeUntilBurnStart;
         private Tally propellantsConsumed;
 
@@ -156,9 +157,10 @@ namespace BetterBurnTime
                     bool isInsufficientFuel;
                     double floatBurnSeconds = GetBurnTime(dVrequired, out isInsufficientFuel);
                     int burnSeconds = double.IsInfinity(floatBurnSeconds) ? -1 : (int)(0.5 + floatBurnSeconds);
-                    if (burnSeconds != lastBurnTime)
+                    if (burnSeconds != lastBurnTime || isInsufficientFuel != wasInsufficientFuel)
                     {
                         lastBurnTime = burnSeconds;
+                        wasInsufficientFuel = isInsufficientFuel;
                         if (isInsufficientFuel)
                         {
                             lastUpdateText = ESTIMATED_BURN_LABEL + TimeFormatter.Default.warn(burnSeconds);
