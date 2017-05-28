@@ -54,7 +54,12 @@ namespace BetterBurnTime
             // N items, separated by whitespace. Note that if countdown text contains "{0}", it's
             // interpreted as a format string for displaying a numeric time.
             // Some options:  ·•▪●■
-            countdownText = config.GetValue("CountdownText", "● ● ● • • • • · · · · ·").Trim();
+            //
+            // UPDATE (KSP 1.3):  Looks like they broke the fonts. The original countdownText default,
+            // "● ● ● • • • • · · · · ·", includes the "●" character, which no longer renders in-game
+            // (just shows up as a bunch of hollow square boxes).  So I'm now using "ʘ" instead, which
+            // is a bit bigger and gaudier than I would prefer, but at least renders correctly.
+            countdownText = config.GetValue("CountdownText", "ʘ ʘ ʘ • • • • · · · · ·").Trim();
             countdownTimes = ParseCountdownTimes(config.GetValue("CountdownTimes", "1, 2, 3, 5, 10, 15"));
             isNumericCountdown = countdownText.Contains("{0}");
 
