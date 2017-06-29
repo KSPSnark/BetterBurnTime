@@ -1,0 +1,20 @@
+ABOUT THIS RELEASE:
+This is an experimental pre-release of BetterBurnTime. It has been
+briefly tested and is believed to be playable, but hasn't been
+exhaustively vetted yet, and features may still be revised before
+"official" release (both for bug-fixing and for design changes).
+
+Please see the BetterBurnTime thread on the KSP forums for detailed
+discussion:
+http://forum.kerbalspaceprogram.com/index.php?/topic/126111-13-betterburntime-v154-accurate-burn-time-indicator-on-navball-no-more-na/
+
+
+EXPERIMENTAL CHANGELOG:
+
+Version 1.6.X01:
+* Add "atmosphere tracker" that shows a message when you're imminently about to enter or leave atmosphere.
+* The atmosphere tracker only shows time until transition (there's no burn time or countdown dots).
+* There are config options for this feature in config.xml.
+* Config option ShowAtmosphereTransition:  Boolean, 0 or 1.  Default = 1 (enabled)
+* Config option MaxTimeToAtmosphereExit, default 300. Max seconds to display the atmosphere exit warning.
+* Config option MaxTimeToAtmosphereEntry, default 900. Max seconds to display the atmosphere entry warning.

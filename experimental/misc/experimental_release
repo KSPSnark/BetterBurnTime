@@ -1,0 +1,7 @@
+echo Creating experimental release file structure.
+mkdir -p GameData/BetterBurnTime
+cp ../experimental_changelog.txt GameData/BetterBurnTime
+cp ../../src/bin/Release/BetterBurnTime.dll GameData/BetterBurnTime
+cp ../../LICENSE GameData/BetterBurnTime
+cp ../../README.md GameData/BetterBurnTime
+echo Done.

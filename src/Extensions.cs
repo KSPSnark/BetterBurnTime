@@ -61,5 +61,38 @@ namespace BetterBurnTime
             if (vessel.parts.Count != 1) return false;
             return vessel.parts[0].HasModule<KerbalEVA>();
         }
+
+        /// <summary>
+        /// Gets whether the vessel is currently in atmosphere.
+        /// </summary>
+        /// <param name="vessel"></param>
+        /// <returns></returns>
+        public static bool IsInAtmosphere(this Vessel vessel)
+        {
+            return vessel.orbit.referenceBody.atmosphere
+                && (vessel.altitude < vessel.orbit.referenceBody.atmosphereDepth);
+        }
+
+        /// <summary>
+        /// Gets whether the orbit is closed (i.e. not an escape trajectory).
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <returns></returns>
+        public static bool IsClosed(this Orbit orbit)
+        {
+            return (orbit.eccentricity < 1.0) && (orbit.ApR < orbit.referenceBody.sphereOfInfluence);
+        }
+
+        /// <summary>
+        /// Gets the radius of the location in the specified orbit at the specified time.
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        public static double GetRadiusAtUT(this Orbit orbit, double time)
+        {
+            return orbit.getRelativePositionAtUT(time).magnitude;
+        }
+
     }
 }
