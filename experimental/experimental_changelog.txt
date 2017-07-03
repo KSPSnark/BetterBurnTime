@@ -11,7 +11,10 @@ http://forum.kerbalspaceprogram.com/index.php?/topic/126111-13-betterburntime-v1
 
 EXPERIMENTAL CHANGELOG:
 
-Version 1.6.X02 (CURRENT VERSION):
+Version 1.6.X03 (CURRENT VERSION):
+* Second round of addressing NRE bug when exiting atmosphere.
+
+Version 1.6.X02:
 * Fix a bug where the atmosphere tracker sometimes spams NRE upon vehicle launch. (Reported by Rodger.)
 
 

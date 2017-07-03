@@ -184,10 +184,13 @@ namespace BetterBurnTime
         /// <returns></returns>
         private double CalculateExitTime(Vessel vessel, out string verb)
         {
-            // Note that this function only gets called if we're already inside the atmosphere.
-            Orbit orbit = vessel.patchedConicSolver.orbit;
-            double atmosphereHeight = FlightGlobals.currentMainBody.atmosphereDepth;
             verb = "N/A";
+            if (vessel.patchedConicSolver == null) return double.NaN;
+            Orbit orbit = vessel.patchedConicSolver.orbit;
+            if (orbit == null) return double.NaN;
+
+            // Note that this function only gets called if we're already inside the atmosphere.
+            double atmosphereHeight = FlightGlobals.currentMainBody.atmosphereDepth;
 
             // Does our orbit leave the atmosphere at all?
             double apoapsis = (orbit.eccentricity < 1.0) ? orbit.ApA : double.PositiveInfinity;
@@ -214,10 +217,13 @@ namespace BetterBurnTime
         /// <returns></returns>
         private double CalculateEntryTime(Vessel vessel, out string verb)
         {
-            // Note that this function only gets called if we're already outside the atmosphere.
-            Orbit orbit = vessel.patchedConicSolver.orbit;
-            double atmosphereHeight = FlightGlobals.currentMainBody.atmosphereDepth;
             verb = "N/A";
+            if (vessel.patchedConicSolver == null) return double.NaN;
+            Orbit orbit = vessel.patchedConicSolver.orbit;
+            if (orbit == null) return double.NaN;
+
+            // Note that this function only gets called if we're already outside the atmosphere.
+            double atmosphereHeight = FlightGlobals.currentMainBody.atmosphereDepth;
 
             // Does our orbit intersect atmosphere at all?
             double periapsis = orbit.PeA;
