@@ -25,6 +25,7 @@ namespace BetterBurnTime
             "FullMetalMachinist",   // for the countdown idea
             "Gen. Jack D. Ripper",  // suggestions around the countdown
             "NathanKell",           // just 'coz he's awesome :-)
+            "Rodger",               // first bug report for 1.6.X01
             "sarbian",              // helpful responses to modding questions
             "SirDiazo",             // code example for calculating vessel height
             "smjjames",             // suggestion about tweaking time formats

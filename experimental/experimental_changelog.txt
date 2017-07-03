@@ -11,6 +11,10 @@ http://forum.kerbalspaceprogram.com/index.php?/topic/126111-13-betterburntime-v1
 
 EXPERIMENTAL CHANGELOG:
 
+Version 1.6.X02 (CURRENT VERSION):
+* Fix a bug where the atmosphere tracker sometimes spams NRE upon vehicle launch. (Reported by Rodger.)
+
+
 Version 1.6.X01:
 * Add "atmosphere tracker" that shows a message when you're imminently about to enter or leave atmosphere.
 * The atmosphere tracker only shows time until transition (there's no burn time or countdown dots).

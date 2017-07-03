@@ -107,6 +107,9 @@ namespace BetterBurnTime
         /// <returns></returns>
         private bool Recalculate()
         {
+            Vessel vessel = FlightGlobals.ActiveVessel;
+            if (vessel == null) return false;
+
             bool shouldDisplay = displayEnabled;
 
             // Only display for bodies with atmospheres.
@@ -119,7 +122,7 @@ namespace BetterBurnTime
                 if (now > nextUpdate)
                 {
                     nextUpdate = now + UPDATE_INTERVAL;
-                    transitionTimeUT = CalculateTimeAtTransition(FlightGlobals.ActiveVessel, out transitionVerb);
+                    transitionTimeUT = CalculateTimeAtTransition(vessel, out transitionVerb);
                 }
                 if (double.IsNaN(transitionTimeUT))
                 {
