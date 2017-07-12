@@ -48,6 +48,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AtmosphereTracker.cs" />
     <Compile Include="BetterBurnTime.cs" />
     <Compile Include="BetterBurnTimeData.cs" />
     <Compile Include="BurnInfo.cs" />

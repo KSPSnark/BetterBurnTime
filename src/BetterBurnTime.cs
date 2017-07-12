@@ -76,11 +76,23 @@ namespace BetterBurnTime
                     dVrequired = ClosestApproachTracker.Velocity;
                     if (double.IsNaN(dVrequired))
                     {
-                        // No closest-approach info available either, use the maneuver dV remaining.
+                        // No closest-approach info available either, do we have a maneuver node?
                         dVrequired = BurnInfo.DvRemaining;
-                        timeUntil = SecondsUntilNode();
-                        shouldDisplayCountdown = true;
-                        burnType = BetterBurnTimeData.BurnType.Maneuver;
+                        if (double.IsNaN(dVrequired))
+                        {
+                            // No, there's no maneuver node.  Do we have atmosphere transition data?
+                            customDescription = AtmosphereTracker.Description;
+                            timeUntil = AtmosphereTracker.TimeUntil;
+                            shouldDisplayCountdown = false;
+                            burnType = BetterBurnTimeData.BurnType.None;
+                        }
+                        else
+                        {
+                            // Yep, use the maneuver node.
+                            timeUntil = SecondsUntilNode();
+                            shouldDisplayCountdown = true;
+                            burnType = BetterBurnTimeData.BurnType.Maneuver;
+                        }
                     }
                     else
                     {
@@ -99,6 +111,24 @@ namespace BetterBurnTime
                     // TODO: enable countdown to retro-burn, not doing it now 'coz it needs more math & logic
                     // shouldDisplayCountdown = true
                     burnType = BetterBurnTimeData.BurnType.Impact;
+                }
+
+                if (FlightGlobals.ActiveVessel == null)
+                {
+                    BurnInfo.Countdown = string.Empty;
+                    if (customDescription == null) BurnInfo.AlternateDisplayEnabled = false;
+                    return;
+                }
+
+                if (double.IsNaN(dVrequired) && !double.IsNaN(timeUntil))
+                {
+                    // Special case of knowing a time until an event, but there's no dV associated
+                    // with it and therefore no burn display.
+                    BurnInfo.Duration = string.Empty;
+                    BurnInfo.TimeUntil = customDescription;
+                    BurnInfo.AlternateDisplayEnabled = true;
+                    BurnInfo.Countdown = string.Empty;
+                    return;
                 }
 
                 // At this point, either we have a dVrequired or not. If we have one, we might

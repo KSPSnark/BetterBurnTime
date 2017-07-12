@@ -3,6 +3,11 @@ using UnityEngine;
 
 namespace BetterBurnTime
 {
+    /// <summary>
+    /// When there's a target set, tracks the time until closest approach to the target,
+    /// if the closest approach is "close enough".  Also provides burn time to reach
+    /// zero relative velocity at closest approach, and a countdown timer.
+    /// </summary>
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     class ClosestApproachTracker : MonoBehaviour
     {
@@ -10,9 +15,9 @@ namespace BetterBurnTime
 
         private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 250);
 
-        // The last time we updated our calculations. Used with UPDATE_INTERVAL
+        // The next time we're due to update our calculations. Used with UPDATE_INTERVAL
         // to prevent spamming excessive calculations.
-        private DateTime lastUpdate;
+        private DateTime nextUpdate;
 
         // The result of calculations.
         private double closestApproachTime;
@@ -54,7 +59,7 @@ namespace BetterBurnTime
             {
                 instance = this;
                 Reset();
-                lastUpdate = DateTime.Now;
+                nextUpdate = DateTime.Now;
             }
             catch (Exception e)
             {
@@ -185,8 +190,8 @@ namespace BetterBurnTime
 
             // If we already have info and it's fresh enough, no need to recalculate.
             DateTime now = DateTime.Now;
-            if (((now - lastUpdate) < UPDATE_INTERVAL) && HasInfo) return true;
-            lastUpdate = now;
+            if ((now < nextUpdate) && HasInfo) return true;
+            nextUpdate = now + UPDATE_INTERVAL;
 
             FindClosestApproach(
                 vessel.orbit,

@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace BetterBurnTime
 {
+    /// <summary>
+    /// This is responsible for tracking how long until we impact terrain, and what the required burn
+    /// time would be to reach zero velocity right at ground level.  It deliberately does not provide
+    /// a burn countdown, since it uses a simplistic model based on looking at the ground elevation
+    /// immediately below the ship's current location, so having a countdown would be lethally
+    /// misleading.
+    /// </summary>
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ImpactTracker : MonoBehaviour
     {
@@ -90,7 +97,7 @@ namespace BetterBurnTime
         }
 
         /// <summary>
-        /// Gets the description to show for closest approach (including time-until).
+        /// Gets the description to show for impact (including time-until).
         /// Null if not available.
         /// </summary>
         public static string Description
@@ -108,6 +115,7 @@ namespace BetterBurnTime
 
         /// <summary>
         /// Do necessary calculations around impact tracking. Returns true if there's anything to display.
+        /// It's okay to call frequently, since it uses an update timer to prevent spamming the CPU.
         /// </summary>
         /// <returns></returns>
         private bool Recalculate()
@@ -151,7 +159,7 @@ namespace BetterBurnTime
             return shouldDisplay;
         }
 
-        private static int AsInteger(double value)
+        public static int AsInteger(double value)
         {
             return (double.IsNaN(value) || double.IsInfinity(value)) ? -1 : (int)value;
         }

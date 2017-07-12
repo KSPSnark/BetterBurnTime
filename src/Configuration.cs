@@ -19,6 +19,11 @@ namespace BetterBurnTime
         public static readonly double closestApproachMaxDistanceKm;
         public static readonly double closestApproachMinTargetDistance;
 
+        // Atmosphere tracker
+        public static readonly bool showAtmosphere;
+        public static readonly double atmosphereMaxTimeUntilExit;
+        public static readonly double atmosphereMaxTimeUntilEntry;
+
         // Display string for countdown indicator
         public static readonly string countdownText;
         public static readonly bool isNumericCountdown;
@@ -49,6 +54,11 @@ namespace BetterBurnTime
             closestApproachMaxTimeUntilEncounter = config.GetValue("MaxTimeUntilEncounter",        900.0); // seconds
             closestApproachMaxDistanceKm         = config.GetValue("MaxClosestApproachDistanceKm", 10.0);
             closestApproachMinTargetDistance     = config.GetValue("MinTargetDistanceMeters",      200.0);
+
+            // Atmosphere transition
+            showAtmosphere              = config.GetValue("ShowAtmosphereTransition", true);
+            atmosphereMaxTimeUntilExit  = config.GetValue("MaxTimeToAtmosphereExit", 300);
+            atmosphereMaxTimeUntilEntry = config.GetValue("MaxTimeToAtmosphereEntry", 900);
 
 
             // N items, separated by whitespace. Note that if countdown text contains "{0}", it's
