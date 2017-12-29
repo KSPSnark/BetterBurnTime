@@ -1,4 +1,8 @@
-Version 1.6  (CURRENT VERSION)
+Version 1.6.1  (CURRENT VERSION)
+* Fix a bug that caused the impact tracker to throw exceptions if the tracking station's not upgraded yet.
+
+
+Version 1.6  (2017-07-12)
 * Add "atmosphere tracker" that shows a message when you're imminently about to enter or leave atmosphere.
 
 

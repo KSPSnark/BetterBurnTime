@@ -272,7 +272,7 @@ namespace BetterBurnTime
             if (fallSpeed < MIN_FALL_SPEED) return double.PositiveInfinity;
 
             // Are we in orbit (i.e. impact is "never")?
-            Orbit orbit = vessel.patchedConicSolver.orbit;
+            Orbit orbit = vessel.orbit;
             double periapsis = orbit.semiMajorAxis * (1.0 - orbit.eccentricity);
             float lowestWarpAltitude = vessel.mainBody.timeWarpAltitudeLimits[1]; // lowest altitude at which warp is possible
             if (periapsis > (vessel.mainBody.Radius + lowestWarpAltitude)) return double.PositiveInfinity;

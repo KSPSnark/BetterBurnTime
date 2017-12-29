@@ -185,8 +185,7 @@ namespace BetterBurnTime
         private double CalculateExitTime(Vessel vessel, out string verb)
         {
             verb = "N/A";
-            if (vessel.patchedConicSolver == null) return double.NaN;
-            Orbit orbit = vessel.patchedConicSolver.orbit;
+            Orbit orbit = vessel.orbit;
             if (orbit == null) return double.NaN;
 
             // Note that this function only gets called if we're already inside the atmosphere.
@@ -218,8 +217,7 @@ namespace BetterBurnTime
         private double CalculateEntryTime(Vessel vessel, out string verb)
         {
             verb = "N/A";
-            if (vessel.patchedConicSolver == null) return double.NaN;
-            Orbit orbit = vessel.patchedConicSolver.orbit;
+            Orbit orbit = vessel.orbit;
             if (orbit == null) return double.NaN;
 
             // Note that this function only gets called if we're already outside the atmosphere.
@@ -248,7 +246,7 @@ namespace BetterBurnTime
         /// <returns></returns>
         private double CalculateTimeAtAltitude(Vessel vessel, double targetAltitude, double maxTimeToTransition)
         {
-            Orbit orbit = vessel.patchedConicSolver.orbit;
+            Orbit orbit = vessel.orbit;
             double targetRadius = targetAltitude + orbit.referenceBody.Radius;
             double now = Planetarium.GetUniversalTime();
             double maxTimeLimit = now + maxTimeToTransition;
