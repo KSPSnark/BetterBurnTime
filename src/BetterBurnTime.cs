@@ -76,21 +76,29 @@ namespace BetterBurnTime
                     dVrequired = ClosestApproachTracker.Velocity;
                     if (double.IsNaN(dVrequired))
                     {
-                        // No closest-approach info available either, do we have a maneuver node?
+                        // No closest-approach info is available either.  At this point, we've exhausted all
+                        // of our special-tracking-burn-information options (impact, closest approach), so
+                        // we won't show any burn information or countdown.  (Before KSP 1.5, we would have
+                        // checked for a maneuver node, and if present, we would have shown a countdown
+                        // and our revised burn time estimate.  KSP 1.5, however, introduced drastically improved
+                        // burn-time indication in stock, so there's no point in trying to compete with that--
+                        // it's good enough, so leave it alone.
+                        shouldDisplayCountdown = false;
+
+                        // Do we have a maneuver node?
                         dVrequired = BurnInfo.DvRemaining;
                         if (double.IsNaN(dVrequired))
                         {
-                            // No, there's no maneuver node.  Do we have atmosphere transition data?
+                            // No, there's no maneuver node.
+                            burnType = BetterBurnTimeData.BurnType.None;
+                            // If we've got an upcoming atmosphere transition, include that info.
                             customDescription = AtmosphereTracker.Description;
                             timeUntil = AtmosphereTracker.TimeUntil;
-                            shouldDisplayCountdown = false;
-                            burnType = BetterBurnTimeData.BurnType.None;
                         }
                         else
                         {
-                            // Yep, use the maneuver node.
+                            // Yep, there's a maneuver node.
                             timeUntil = SecondsUntilNode();
-                            shouldDisplayCountdown = true;
                             burnType = BetterBurnTimeData.BurnType.Maneuver;
                         }
                     }
@@ -135,7 +143,9 @@ namespace BetterBurnTime
                 // have a description (meaning it's one of our custom trackers from this mod)
                 // or we might not (meaning "leave it alone at let the stock game decide what to say").
 
-                if (double.IsNaN(dVrequired) || (FlightGlobals.ActiveVessel == null))
+                if ((burnType == BetterBurnTimeData.BurnType.Maneuver)
+                    || double.IsNaN(dVrequired)
+                    || (FlightGlobals.ActiveVessel == null))
                 {
                     BurnInfo.Countdown = string.Empty;
                     if (customDescription == null) BurnInfo.AlternateDisplayEnabled = false;

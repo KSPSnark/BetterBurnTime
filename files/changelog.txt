@@ -1,4 +1,13 @@
-Version 1.6.1  (CURRENT VERSION)
+Version 1.7  (CURRENT VERSION)
+* Updated for KSP 1.5 compatibility.
+* The burn time indicator for maneuver nodes is now gone (in favor of the improved stock navball in KSP 1.5).
+* Indicators remain for surface impact, target rendezvous, and atmosphere transition.
+
+
+----- Everything below this line will run ONLY on KSP 1.4.5 and older -----
+
+
+Version 1.6.1  (2017-12-29)
 * Fix a bug that caused the impact tracker to throw exceptions if the tracking station's not upgraded yet.
 
 
@@ -33,6 +42,7 @@ Version 1.5  (2016-10-11)
 
 
 ----- Everything above this line will run ONLY on KSP 1.2 and newer -----
+
 ----- Everything below this line will run ONLY on KSP 1.1.3 and older -----
 
 
@@ -61,6 +71,7 @@ Version 1.4  (2016-03-30)
 
 
 ----- Everything above this line will run ONLY on KSP 1.1 and newer -----
+
 ----- Everything below this line will run ONLY on KSP 1.0.5 and older -----
 
 
