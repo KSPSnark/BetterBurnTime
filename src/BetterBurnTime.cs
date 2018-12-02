@@ -7,12 +7,12 @@ namespace BetterBurnTime
     public class BetterBurnTime : MonoBehaviour
     {
         // Treat any acceleration smaller than this as zero.
-        private static readonly double ACCELERATION_EPSILON = 0.000001;
+        private const double ACCELERATION_EPSILON = 0.000001;
 
         // Kerbin gravity, needed for working with Isp
-        private static readonly double KERBIN_GRAVITY = 9.81;
+        public const double KERBIN_GRAVITY = 9.81;
 
-        private static readonly string ESTIMATED_BURN_LABEL = "Est. Burn: ";
+        private const string ESTIMATED_BURN_LABEL = "Est. Burn: ";
 
         // Displayed in place of burn time when it's an EVA kerbal.
         private static readonly string EVA_KERBAL_LABEL = string.Empty;

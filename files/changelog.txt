@@ -1,4 +1,9 @@
-Version 1.7  (CURRENT VERSION)
+Version 1.8  (2018-12-01)
+* Add burn time indicator for SRBs.
+* Now includes ModuleManager (version 3.1.0).
+
+
+Version 1.7  (2018-10-15)
 * Updated for KSP 1.5 compatibility.
 * The burn time indicator for maneuver nodes is now gone (in favor of the improved stock navball in KSP 1.5).
 * Indicators remain for surface impact, target rendezvous, and atmosphere transition.

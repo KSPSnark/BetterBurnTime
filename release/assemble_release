@@ -1,6 +1,9 @@
 echo Creating release file structure for $1
 mkdir -p $1/GameData/BetterBurnTime
+cp ../files/ModuleManager.*.dll $1/GameData
+cp ../files/ModuleManagerLicense.md $1/GameData
 cp ../files/changelog.txt $1/GameData/BetterBurnTime
+cp ../files/*.cfg $1/GameData/BetterBurnTime
 cp ../src/bin/Release/BetterBurnTime.dll $1/GameData/BetterBurnTime
 cp ../LICENSE $1/GameData/BetterBurnTime
 cp ../README.md $1/GameData/BetterBurnTime
