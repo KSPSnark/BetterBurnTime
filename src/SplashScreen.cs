@@ -29,7 +29,8 @@ namespace BetterBurnTime
             "sarbian",              // helpful responses to modding questions
             "SirDiazo",             // code example for calculating vessel height
             "smjjames",             // suggestion about tweaking time formats
-            "linuxgurugamer"        // pointed out that I'm targeting the wrong .NET version
+            "linuxgurugamer",       // pointed out that I'm targeting the wrong .NET version
+            "Nik Power"             // provided vital repro case to fix a bug in 1.8
         };
 
         internal void Awake()

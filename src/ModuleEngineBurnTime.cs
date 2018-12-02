@@ -202,9 +202,15 @@ namespace BetterBurnTime
         {
             // I actually would prefer not to *have* any panel over there, but
             // I haven't been able to figure out any way to do that while still
-            // keeping the "primary field" info displayed. So just return null,
-            // which the game will handle by simply not displaying a title line.
-            return null;
+            // keeping the "primary field" info displayed.
+            //
+            // Given that I have to have a panel, I'd like to keep it minimalist.
+            // I'd prefer to just return null here-- which causes no title to be
+            // displayed, thus reducing visual clutter-- but although the stock
+            // game is just fine with that, it turns out that B9PartSwitch (a
+            // popular and very common mod) causes KSP to barf and hang on the
+            // loading screen. Therefore, provide a title here... under duress.
+            return "SRB burn time";
         }
 
         public Callback<Rect> GetDrawModulePanelCallback()

@@ -1,3 +1,8 @@
+Version 1.8.1  (2018-12-02)
+* Fix a bug in 1.8 that caused the KSP loading screen to hang if B9PartSwitch is also installed.
+* Thanks to Nik Power in the KSP forums for providing the vital repro case that allowed finding & fixing the issue!
+
+
 Version 1.8  (2018-12-01)
 * Add burn time indicator for SRBs.
 * Now includes ModuleManager (version 3.1.0).
