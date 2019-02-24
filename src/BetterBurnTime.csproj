@@ -56,9 +56,11 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Countdown.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="GeosyncTracker.cs" />
     <Compile Include="ImpactTracker.cs" />
     <Compile Include="Logging.cs" />
     <Compile Include="ModuleEngineBurnTime.cs" />
+    <Compile Include="OverrideKey.cs" />
     <Compile Include="SafeText.cs" />
     <Compile Include="ShipState.cs" />
     <Compile Include="SplashScreen.cs" />

@@ -1,3 +1,8 @@
+Version 1.9  (2019-02-24)
+* Add a "geosynchrony tracker" to assist putting vessels in geosynchronous orbits.
+* Update to latest ModuleManager version (4.0.2).
+
+
 Version 1.8.1  (2018-12-02)
 * Fix a bug in 1.8 that caused the KSP loading screen to hang if B9PartSwitch is also installed.
 * Thanks to Nik Power in the KSP forums for providing the vital repro case that allowed finding & fixing the issue!

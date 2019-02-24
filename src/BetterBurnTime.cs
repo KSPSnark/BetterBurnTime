@@ -93,7 +93,15 @@ namespace BetterBurnTime
                             burnType = BetterBurnTimeData.BurnType.None;
                             // If we've got an upcoming atmosphere transition, include that info.
                             customDescription = AtmosphereTracker.Description;
-                            timeUntil = AtmosphereTracker.TimeUntil;
+                            if (customDescription == null)
+                            {
+                                customDescription = GeosyncTracker.Description;
+                                timeUntil = 0;
+                            }
+                            else
+                            {
+                                timeUntil = AtmosphereTracker.TimeUntil;
+                            }
                         }
                         else
                         {

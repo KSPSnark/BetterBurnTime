@@ -8,6 +8,8 @@ namespace BetterBurnTime
     {
         // General program usage
         public static readonly bool useSimpleAcceleration;
+        public static readonly string overrideKey;
+        public static readonly bool stickyOverride;
 
         // Impact tracker
         public static readonly bool showImpact;
@@ -23,6 +25,12 @@ namespace BetterBurnTime
         public static readonly bool showAtmosphere;
         public static readonly double atmosphereMaxTimeUntilExit;
         public static readonly double atmosphereMaxTimeUntilEntry;
+
+        // Geosync tracker
+        public static readonly double geosyncPrecisionLimit;
+        public static readonly TimeSpan geosyncIdleTimeout;
+        public static readonly string geosyncLabel;
+        public static readonly double geosyncSecondsTransition;
 
         // Display string for countdown indicator
         public static readonly string countdownText;
@@ -44,6 +52,10 @@ namespace BetterBurnTime
 
             // General program usage
             useSimpleAcceleration = config.GetValue("UseSimpleAcceleration", false);
+            // Unity key names (for override key) are documented here:
+            // https://docs.unity3d.com/Manual/ConventionalGameInput.html
+            overrideKey = config.GetValue("OverrideKey", "right ctrl");
+            stickyOverride = config.GetValue("StickyOverride", false);
 
             // Impact tracker
             showImpact = config.GetValue("ShowImpactTracker", true);
@@ -59,6 +71,13 @@ namespace BetterBurnTime
             showAtmosphere              = config.GetValue("ShowAtmosphereTransition", true);
             atmosphereMaxTimeUntilExit  = config.GetValue("MaxTimeToAtmosphereExit", 300);
             atmosphereMaxTimeUntilEntry = config.GetValue("MaxTimeToAtmosphereEntry", 900);
+
+            // Geosync tracker
+            geosyncPrecisionLimit = config.GetValue("GeosyncPrecisionLimit", 0.05);
+            int geosyncIdleTimeoutSeconds = config.GetValue("GeosyncIdleTimeout", 10);
+            geosyncIdleTimeout = new TimeSpan(0, 0, geosyncIdleTimeoutSeconds);
+            geosyncLabel = config.GetValue("GeosyncLabel", "gsync");
+            geosyncSecondsTransition = config.GetValue("GeosyncSecondsTransition", 10.0);
 
 
             // N items, separated by whitespace. Note that if countdown text contains "{0}", it's

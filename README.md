@@ -2,7 +2,7 @@
 KSP mod for a more accurate/reliable "estimated burn time" indicator on the navball.  Also provides estimated time-of-impact for landing on vacuum worlds, and time-to-closest-approach for orbital rendezvous.
 
 
-##How to install
+## How to install
 Unzip into your GameData folder, like any mod.
 
 
@@ -12,7 +12,7 @@ Unzip into your GameData folder, like any mod.
 * When the ship is in vacuum and on a collision course with the ground, it will automatically show time-to-impact, and the estimated burn time to kill your velocity at ground level.
 * When the ship is in orbit and has a close rendezvous with a target ship, it will automatically show time-to-closest-approach, and the estimated burn time to kill your velocity relative to the target.
 
-####What this means:
+#### What this means:
 
 **For maneuver nodes:**
 
