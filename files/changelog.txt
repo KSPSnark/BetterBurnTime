@@ -1,3 +1,7 @@
+Version 1.9.1  (2019-03-09)
+* Add "target synchrony" tracker (works similarly to geosynchrony tracker)
+
+
 Version 1.9  (2019-02-24)
 * Add a "geosynchrony tracker" to assist putting vessels in geosynchronous orbits.
 * Update to latest ModuleManager version (4.0.2).

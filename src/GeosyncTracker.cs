@@ -29,7 +29,11 @@ namespace BetterBurnTime
         private static readonly double PRECISION_LIMIT = Configuration.geosyncPrecisionLimit;
 
         // The base label to use when the display is active, e.g. "gsync".
-        private static readonly string LABEL = Configuration.geosyncLabel;
+        private static readonly string GEOSYNC_LABEL = Configuration.geosyncLabel;
+
+        // The base label to use when the display is active for a *target* rather than a
+        // celestial body, e.g. "tsync"
+        private static readonly string TARGETSYNC_LABEL = Configuration.targetsyncLabel;
 
         // The number of seconds offset, below which the delta is displayed in milliseconds
         // rather than hours / minutes / seconds.
@@ -40,7 +44,9 @@ namespace BetterBurnTime
         // ship is not currently in a stable orbit (e.g. escaping, suborbital, etc.) Note
         // that this is only ever displayed if the override key is toggled on, because
         // otherwise, a ship in such a situation simply wouldn't display any geosync info.
-        private static readonly string NOT_APPLICABLE = LABEL + " ~";
+        private const string NOT_APPLICABLE_SUFFIX = " ~";
+        private static readonly string NOT_APPLICABLE_GSYNC = GEOSYNC_LABEL + NOT_APPLICABLE_SUFFIX;
+        private static readonly string NOT_APPLICABLE_TSYNC = TARGETSYNC_LABEL + NOT_APPLICABLE_SUFFIX;
 
         // The display description to use if a geosynchronous orbit is impossible for the
         // current celestial body, because either it's not rotating or else it's rotating
@@ -48,12 +54,14 @@ namespace BetterBurnTime
         // can reach. Note that this is only ever displayed if the override key is toggled
         // on, because otherwise, a ship in such a situation simply wouldn't display any
         // geosync info.
-        private static readonly string GEOSYNC_IMPOSSIBLE = LABEL + " X";
+        private const string IMPOSSIBLE_SUFFIX = " X";
+        private static readonly string GEOSYNC_IMPOSSIBLE = GEOSYNC_LABEL + IMPOSSIBLE_SUFFIX;
+        private static readonly string TARGETSYNC_IMPOSSIBLE = TARGETSYNC_LABEL + IMPOSSIBLE_SUFFIX;
 
         // How close to idle a ship's control input needs to be in order to count as "active".
         private const double CONTROL_INPUT_THRESHOLD = 0.15;
 
-        private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 470);
+        private static readonly TimeSpan UPDATE_INTERVAL = new TimeSpan(0, 0, 0, 0, 270);
 
         // We don't want to show this tracker *all* the time a craft is close to geosync, because
         // it would be there permanently and never go away-- it would be extraneous screen clutter.
@@ -65,14 +73,16 @@ namespace BetterBurnTime
 
         private DateTime nextUpdate;
 
-        private string currentCelestialBody = null;
-        private double celestialBodyRotationTime = double.NaN;
+        private CelestialBody currentCelestialBody = null;
+        private double bodyRotationPeriod = double.NaN;
+        private double targetOrbitalPeriod = double.NaN;
         private double orbitalPeriod = double.NaN;
         private long lastSecondsOffset = 0;
         private long lastMillisecondsOffset = 0;
 
         // The text description to display. Will be null if it shouldn't be displayed.
-        private string description;
+        private string geosyncDescription;
+        private string targetsyncDescription;
 
         /// <summary>
         /// Here when the add-on loads upon flight start.
@@ -93,13 +103,15 @@ namespace BetterBurnTime
             {
                 if (!CheckExpiry())
                 {
-                    description = null;
+                    geosyncDescription = null;
+                    targetsyncDescription = null;
                     return;
                 }
 
                 Refresh();
                 SetOrbitalPeriod();
-                UpdateDescription();
+                UpdateDescription(GEOSYNC_LABEL, bodyRotationPeriod, ref geosyncDescription);
+                UpdateDescription(TARGETSYNC_LABEL, targetOrbitalPeriod, ref targetsyncDescription);
             }
             catch (Exception e)
             {
@@ -116,10 +128,18 @@ namespace BetterBurnTime
             get
             {
                 if (instance == null) return null;
-                if (instance.description != null) return instance.description;
+                if (instance.targetsyncDescription != null) return instance.targetsyncDescription;
+                if (instance.geosyncDescription != null) return instance.geosyncDescription;
                 if (PRECISION_LIMIT == 0) return null;
                 if (!OverrideKey.IsActive) return null;
-                return double.IsNaN(instance.celestialBodyRotationTime) ? GEOSYNC_IMPOSSIBLE : NOT_APPLICABLE;
+                if (FlightGlobals.ActiveVessel.targetObject == null)
+                {
+                    return double.IsNaN(instance.bodyRotationPeriod) ? GEOSYNC_IMPOSSIBLE : NOT_APPLICABLE_GSYNC;
+                }
+                else
+                {
+                    return double.IsNaN(instance.targetOrbitalPeriod) ? TARGETSYNC_IMPOSSIBLE : NOT_APPLICABLE_TSYNC;
+                }
             }
         }
 
@@ -134,17 +154,34 @@ namespace BetterBurnTime
             if (now < nextUpdate) return;
             nextUpdate = now + UPDATE_INTERVAL;
 
+            bool wasTarget = !double.IsNaN(targetOrbitalPeriod);
+            RefreshCelestialBody(vessel);
+            RefreshTarget(vessel);
+            bool isTarget = !double.IsNaN(targetOrbitalPeriod);
+            if (wasTarget != isTarget)
+            {
+                lastMillisecondsOffset = 0;
+                lastSecondsOffset = 0;
+            }
+        }
+
+        /// <summary>
+        /// Update the current celestial body.
+        /// </summary>
+        /// <returns></returns>
+        private void RefreshCelestialBody(Vessel vessel)
+        {
             // Has the current celestial body changed since the last time we checked?
             CelestialBody body = vessel.mainBody;
-            if (body.name == currentCelestialBody) return;
+            if (body == currentCelestialBody) return;
 
             // It changed, set the rotation period.
-            currentCelestialBody = body.name;
-            Logging.Log("Current celestial body set to " + currentCelestialBody);
+            currentCelestialBody = body;
+            Logging.Log("Current celestial body set to " + currentCelestialBody.name);
             if (!body.rotates)
             {
-                Logging.Log(currentCelestialBody + " doesn't rotate, no geosynchronous orbit is possible");
-                celestialBodyRotationTime = double.NaN;
+                Logging.Log(currentCelestialBody.name + " doesn't rotate, no geosynchronous orbit is possible");
+                bodyRotationPeriod = double.NaN;
                 return;
             }
 
@@ -152,20 +189,47 @@ namespace BetterBurnTime
             // orbit is possible.
             double angularVelocity = 2.0 * Math.PI / body.rotationPeriod;
             double geosyncRadius = Math.Pow(
-                body.gravParameter / (angularVelocity* angularVelocity),
+                body.gravParameter / (angularVelocity * angularVelocity),
                 1.0 / 3.0);
             if (body.sphereOfInfluence <= geosyncRadius)
             {
                 Logging.Log(
-                    currentCelestialBody + " geosync radius of " + geosyncRadius
+                    currentCelestialBody.name + " geosync radius of " + geosyncRadius
                     + " meters exceeds SoI size of " + body.sphereOfInfluence
                     + " meters, no geosynchronous orbit is possible");
-                celestialBodyRotationTime = double.NaN;
+                bodyRotationPeriod = double.NaN;
                 return;
             }
             double geosyncAltitudeKm = (geosyncRadius - body.Radius) / 1000.0;
             Logging.Log(string.Format("Geosync altitude: {0:0.###} km", geosyncAltitudeKm));
-            celestialBodyRotationTime = body.rotationPeriod;
+            bodyRotationPeriod = body.rotationPeriod;
+        }
+
+        /// <summary>
+        /// Update the current target.
+        /// </summary>
+        /// <param name="vessel"></param>
+        private void RefreshTarget(Vessel vessel)
+        {
+            // Do we have a target?
+            ITargetable target = vessel.targetObject;
+            if (target == null)
+            {
+                targetOrbitalPeriod = double.NaN;
+                return;
+            }
+
+            // We have a target. If it's a vessel, is it orbiting?
+            Vessel targetVessel = target.GetVessel();
+            if ((targetVessel != null) && (targetVessel.situation != Vessel.Situations.ORBITING))
+            {
+                Logging.Log("Target vessel " + vessel.vesselName + " is " + targetVessel.situation + ", no synchronous orbit is possible");
+                targetOrbitalPeriod = double.NaN;
+                return;
+            }
+
+            // It's either a celestial body, or an orbiting vessel. Use its orbital period.
+            targetOrbitalPeriod = target.GetOrbit().period;
         }
 
         private void SetOrbitalPeriod()
@@ -177,20 +241,20 @@ namespace BetterBurnTime
             orbitalPeriod = vessel.orbit.period;
         }
 
-        private void UpdateDescription()
+        private void UpdateDescription(string label, double desiredPeriod, ref string description)
         {
             // Do we have info for stable orbit duration and planet rotation time?
-            if (double.IsNaN(celestialBodyRotationTime) || double.IsNaN(orbitalPeriod))
+            if (double.IsNaN(desiredPeriod) || double.IsNaN(orbitalPeriod))
             {
                 description = null;
                 return;
             }
 
             // How far off being geosynchronous are we?
-            double offset = orbitalPeriod - celestialBodyRotationTime;
+            double offset = orbitalPeriod - desiredPeriod;
 
             // Is it close enough to perfect geosynchrony to show the display?
-            double fraction = Math.Abs(offset / celestialBodyRotationTime);
+            double fraction = Math.Abs(offset / desiredPeriod);
             if (!OverrideKey.IsActive && (fraction > PRECISION_LIMIT))
             {
                 description = null;
@@ -212,14 +276,14 @@ namespace BetterBurnTime
                     return;
                 }
                 long millisecondsOffset = (long)(doubleOffsetMs);
-                if ((description == null) || (millisecondsOffset != lastMillisecondsOffset)) SetMillisecondsDescription(millisecondsOffset);
+                if ((description == null) || (millisecondsOffset != lastMillisecondsOffset)) SetMillisecondsDescription(label, millisecondsOffset, ref description);
                 lastSecondsOffset = (long)offset;
                 lastMillisecondsOffset = millisecondsOffset;
             }
             else
             {
                 long secondsOffset = (long)offset;
-                if ((description == null) || (secondsOffset != lastSecondsOffset)) SetSecondsDescription(secondsOffset);
+                if ((description == null) || (secondsOffset != lastSecondsOffset)) SetSecondsDescription(label, secondsOffset, ref description);
                 lastSecondsOffset = secondsOffset;
                 lastMillisecondsOffset = long.MinValue;
             }
@@ -228,12 +292,14 @@ namespace BetterBurnTime
         /// <summary>
         /// Configure the geosync description for a given number of milliseconds.
         /// </summary>
+        /// <param name="label"></param>
         /// <param name="millisecondsOffset"></param>
-        private void SetMillisecondsDescription(long millisecondsOffset)
+        /// <param name="description"></param>
+        private void SetMillisecondsDescription(string label, long millisecondsOffset, ref string description)
         {
             description = string.Format(
                 "{0} {1}{2}ms",
-                LABEL,
+                label,
                 SignOf(millisecondsOffset),
                 Math.Abs(millisecondsOffset));
         }
@@ -241,12 +307,14 @@ namespace BetterBurnTime
         /// <summary>
         /// Configure the geosync description for a given number of seconds.
         /// </summary>
+        /// <param name="label"></param>
         /// <param name="secondsOffset"></param>
-        private void SetSecondsDescription(long secondsOffset)
+        /// <param name="description"></param>
+        private void SetSecondsDescription(string label, long secondsOffset, ref string description)
         {
             description = string.Format(
                 "{0} {1}{2}",
-                LABEL,
+                label,
                 SignOf(secondsOffset),
                 TimeFormatter.Default.format((int)Math.Abs(secondsOffset)));
         }

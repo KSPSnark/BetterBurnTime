@@ -30,6 +30,7 @@ namespace BetterBurnTime
         public static readonly double geosyncPrecisionLimit;
         public static readonly TimeSpan geosyncIdleTimeout;
         public static readonly string geosyncLabel;
+        public static readonly string targetsyncLabel;
         public static readonly double geosyncSecondsTransition;
 
         // Display string for countdown indicator
@@ -77,6 +78,7 @@ namespace BetterBurnTime
             int geosyncIdleTimeoutSeconds = config.GetValue("GeosyncIdleTimeout", 10);
             geosyncIdleTimeout = new TimeSpan(0, 0, geosyncIdleTimeoutSeconds);
             geosyncLabel = config.GetValue("GeosyncLabel", "gsync");
+            targetsyncLabel = config.GetValue("TargetsyncLabel", "tsync");
             geosyncSecondsTransition = config.GetValue("GeosyncSecondsTransition", 10.0);
 
 
