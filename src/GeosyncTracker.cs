@@ -219,17 +219,19 @@ namespace BetterBurnTime
                 return;
             }
 
-            // We have a target. If it's a vessel, is it orbiting?
+            // We have a target. If it's a vessel, is it non-orbiting?
             Vessel targetVessel = target.GetVessel();
             if ((targetVessel != null) && (targetVessel.situation != Vessel.Situations.ORBITING))
             {
-                Logging.Log("Target vessel " + vessel.vesselName + " is " + targetVessel.situation + ", no synchronous orbit is possible");
                 targetOrbitalPeriod = double.NaN;
                 return;
             }
 
-            // It's either a celestial body, or an orbiting vessel. Use its orbital period.
-            targetOrbitalPeriod = target.GetOrbit().period;
+            // It's something else.  Could be an orbiting vessel, could be a celestial body,
+            // could be some other ITargetable (which I believe doesn't exist in the stock
+            // game, but mods could introduce other types).  Does it have an orbit?
+            Orbit orbit = target.GetOrbit();
+            targetOrbitalPeriod = (orbit == null) ? double.NaN : orbit.period;
         }
 
         private void SetOrbitalPeriod()

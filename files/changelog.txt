@@ -1,3 +1,11 @@
+Version 1.10  (2019-10-16)
+* Update for KSP 1.8 compatibility.
+* Includes update to ModuleManager 4.1.0.
+
+
+----- Everything below this line will run ONLY on KSP 1.7.3 and older -----
+
+
 Version 1.9.1  (2019-03-09)
 * Add "target synchrony" tracker (works similarly to geosynchrony tracker)
 
