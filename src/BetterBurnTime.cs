@@ -334,6 +334,7 @@ namespace BetterBurnTime
                         for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
                         {
                             Propellant propellant = engine.propellants[propellantIndex];
+                            double density = PartResourceLibrary.Instance.GetDefinition(propellant.name).density;
                             if (!ShouldIgnore(propellant.name))
                             {
                                 if (!availableResources.Has(propellant.name))
@@ -341,7 +342,7 @@ namespace BetterBurnTime
                                     isStarved = true;
                                     break;
                                 }
-                                ratioSum += propellant.ratio;
+                                ratioSum += propellant.ratio * density;
                             }
                         }
                         if (isStarved) continue;
@@ -351,9 +352,10 @@ namespace BetterBurnTime
                             for (int propellantIndex = 0; propellantIndex < engine.propellants.Count; ++propellantIndex)
                             {
                                 Propellant propellant = engine.propellants[propellantIndex];
+                                double density = PartResourceLibrary.Instance.GetDefinition(propellant.name).density;
                                 if (!ShouldIgnore(propellant.name))
                                 {
-                                    double consumptionRate = ratio * propellant.ratio * engineTotalFuelConsumption; // tons/sec
+                                    double consumptionRate = ratio * propellant.ratio * density * engineTotalFuelConsumption; // tons/sec
                                     propellantsConsumed.Add(propellant.name, consumptionRate);
                                 }
                             }
