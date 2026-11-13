@@ -1,52 +1,62 @@
 ﻿using KSP.IO;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace BetterBurnTime
 {
+    [KSPAddon(KSPAddon.Startup.Instantly, true)]
+    class ConfigurationInitializer : MonoBehaviour
+    {
+        void Awake()
+        {
+            Configuration.Initialize();
+        }
+    }
+    
     static class Configuration
     {
         // General program usage
-        public static readonly bool useSimpleAcceleration;
-        public static readonly string overrideKey;
-        public static readonly bool stickyOverride;
+        public static bool useSimpleAcceleration;
+        public static string overrideKey;
+        public static bool stickyOverride;
 
         // Impact tracker
-        public static readonly bool showImpact;
-        public static readonly double impactMaxTimeUntil;
+        public static bool showImpact;
+        public static double impactMaxTimeUntil;
 
         // Closest approach tracker
-        public static readonly bool showClosestApproach;
-        public static readonly double closestApproachMaxTimeUntilEncounter;
-        public static readonly double closestApproachMaxDistanceKm;
-        public static readonly double closestApproachMinTargetDistance;
+        public static bool showClosestApproach;
+        public static double closestApproachMaxTimeUntilEncounter;
+        public static double closestApproachMaxDistanceKm;
+        public static double closestApproachMinTargetDistance;
 
         // Atmosphere tracker
-        public static readonly bool showAtmosphere;
-        public static readonly double atmosphereMaxTimeUntilExit;
-        public static readonly double atmosphereMaxTimeUntilEntry;
+        public static bool showAtmosphere;
+        public static double atmosphereMaxTimeUntilExit;
+        public static double atmosphereMaxTimeUntilEntry;
 
         // Geosync tracker
-        public static readonly double geosyncPrecisionLimit;
-        public static readonly TimeSpan geosyncIdleTimeout;
-        public static readonly string geosyncLabel;
-        public static readonly string targetsyncLabel;
-        public static readonly double geosyncSecondsTransition;
+        public static double geosyncPrecisionLimit;
+        public static TimeSpan geosyncIdleTimeout;
+        public static string geosyncLabel;
+        public static string targetsyncLabel;
+        public static double geosyncSecondsTransition;
 
         // Display string for countdown indicator
-        public static readonly string countdownText;
-        public static readonly bool isNumericCountdown;
-        public static readonly int[] countdownTimes;
+        public static string countdownText;
+        public static bool isNumericCountdown;
+        public static int[] countdownTimes;
 
         // Time formats
-        public static readonly string timeFormatSeconds;
-        public static readonly string timeFormatMinutesSeconds;
-        public static readonly string timeFormatHoursMinutesSeconds;
-        public static readonly string timeFormatHoursMinutes;
-        public static readonly string timeFormatHours;
-        public static readonly string timeFormatWarning;
+        public static string timeFormatSeconds;
+        public static string timeFormatMinutesSeconds;
+        public static string timeFormatHoursMinutesSeconds;
+        public static string timeFormatHoursMinutes;
+        public static string timeFormatHours;
+        public static string timeFormatWarning;
 
-        static Configuration()
+        public static void Initialize()
         {
             PluginConfiguration config = PluginConfiguration.CreateForType<BetterBurnTime>();
             config.load();
